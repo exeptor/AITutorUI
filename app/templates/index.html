@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AITutor - Home</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>Login</title>
 </head>
 <body>
 
@@ -32,17 +32,11 @@
         </div>
     </header>
 
-    <div class="container">
-        <h2>Login</h2>
-        <form method="POST">
-            {{ form.hidden_tag() }}
-            {{ form.username.label() }} {{ form.username() }}
-            {{ form.password.label() }} {{ form.password() }}
-            {{ form.submit() }}
-        </form>
-        <div class="link">
-            <p>Don't have an account? <a href="{{ url_for('main.register') }}">Register here</a></p>
-        </div>
+    <!-- Main content -->
+    <div class="main-content">
+        <h2>Welcome to AITutor</h2>
+        <p>Your gateway to learning AI concepts.</p>
     </div>
+
 </body>
 </html>

@@ -7,11 +7,35 @@
     <title>Dashboard</title>
 </head>
 <body>
-    <div class="container">
-        <h2>Welcome to Your Dashboard!</h2>
-        <div style="text-align: right;">
-            <p>{{ username }} | <a href="{{ url_for('main.logout') }}">Logout</a></p>
+
+    <!-- Header section -->
+    <header class="header">
+        <div class="header-content">
+            <!-- Logo -->
+            <div class="header-logo">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="" height="30">
+            </div>
+            
+            <!-- Horizontal menu -->
+            <nav class="horizontal-menu">
+                <a href="#">Home</a>
+                <a href="#">Courses</a>
+                <a href="#">About</a>
+                <a href="#">Contacts</a>
+            </nav>
+
+            <!-- User section -->
+            <div class="header-user">
+                <img src="{{ url_for('static', filename='images/user-icon.png') }}" alt="User Icon">
+                <div style="text-align: right;">
+                    <p>{{ username }} | <a href="{{ url_for('main.logout') }}">Logout</a></p>
+                </div>
+            </div>
         </div>
+    </header>
+
+    <div class="main-content">
+        <h2>Welcome to Your Dashboard!</h2>
         <p>This is a placeholder for your dashboard content.</p>
     </div>
 </body>

@@ -5,7 +5,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 main = Blueprint('main', __name__)
 
-@main.route("/", methods=["GET", "POST"])
+@main.route("/")
+def index():
+    return render_template("index.html")
+
+@main.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -54,5 +58,5 @@ def dashboard():
 
 @main.route('/logout')
 def logout():
-    flash('You have been logged out.', 'info')  # Optional: flash a message
-    return redirect(url_for('main.login'))  # Redirect to the login page
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('main.index'))
