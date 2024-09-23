@@ -2,6 +2,8 @@ from flask import Blueprint, render_template, flash, redirect, url_for, session
 from .forms import LoginForm, RegistrationForm
 from .models import db, User
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import login_required
+from .decorators.auth_decorators import admin_required
 
 main = Blueprint('main', __name__)
 
@@ -33,6 +35,7 @@ def register():
         username = form.username.data
         email = form.email.data
         password = form.password.data
+        applied_for_teacher = form.applied_for_teacher.data
         
         if User.query.filter((User.username == username) | (User.email == email)).first():
             flash('Username or email already exists. Please choose another.', 'danger')
@@ -41,7 +44,8 @@ def register():
         new_user = User(
             username=username,
             email=email,
-            password=generate_password_hash(password)
+            password=generate_password_hash(password),
+            applied_for_teacher=applied_for_teacher
         )
         
         db.session.add(new_user)
@@ -60,3 +64,17 @@ def dashboard():
 def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('main.index'))
+
+@main.route('/admin/approve_teacher/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required
+def approve_teacher(user_id):
+    user = User.query.get(user_id)
+    if user and user.applied_for_teacher:
+        user.role = 'teacher'
+        user.is_teacher_approved = True
+        db.session.commit()
+        flash('Teacher application approved', 'success')
+    else:
+        flash('User not found or not applied for teacher', 'error')
+    return redirect(url_for('admin_dashboard'))
