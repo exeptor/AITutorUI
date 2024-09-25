@@ -148,3 +148,17 @@ body {
     padding: 0;
 }
 
+div.checkbox-container {
+    margin-bottom: 15px; /* Adjust this value for more or less space */
+}
+
+.logo {
+    width: 60px;  /* Adjust to the size you want */
+    height: 60px; /* Adjust to maintain aspect ratio */
+}
+
+.header-logo {
+    display: flex;
+    align-items: center;  /* Vertically center the logo */
+    justify-content: start; /* Keep it aligned to the left */
+}

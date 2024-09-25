@@ -73,6 +73,7 @@ def approve_teacher(user_id):
     if user and user.applied_for_teacher:
         user.role = 'teacher'
         user.is_teacher_approved = True
+        user.applied_for_teacher = False
         db.session.commit()
         flash('Teacher application approved', 'success')
     else:

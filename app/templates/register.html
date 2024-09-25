@@ -13,14 +13,14 @@
         <div class="header-content">
             <!-- Logo -->
             <div class="header-logo">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="" height="30">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo" alt="">
             </div>
             
             <!-- Horizontal menu -->
             <nav class="horizontal-menu">
                 <a href="#">Home</a>
                 <a href="#">Courses</a>
-                <a href="#">About</a>
+                <a href="#">Blog</a>
                 <a href="#">Contacts</a>
             </nav>
 
@@ -39,7 +39,9 @@
             {{ form.username.label() }} {{ form.username() }}
             {{ form.email.label() }} {{ form.email() }}
             {{ form.password.label() }} {{ form.password() }}
-            {{ form.applied_for_teacher() }} {{ form.applied_for_teacher.label }}
+            <div class="checkbox-container">
+                {{ form.applied_for_teacher() }} {{ form.applied_for_teacher.label }}
+            </div>
             {{ form.submit() }}
         </form>
         <div class="link">
