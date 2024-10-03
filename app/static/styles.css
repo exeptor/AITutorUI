@@ -108,7 +108,7 @@ button:hover {
 }
 
 .horizontal-menu a:hover {
-    background-color: #0056b3;
+    background-color: #ee7512;
 }
 
 /* User section on the right */
@@ -130,19 +130,20 @@ button:hover {
 }
 
 .header-user a:hover {
-    text-decoration: underline;
+    /* text-decoration: underline; */
+    color: #ee7512;
 }
 
 /* Main content below header */
 .main-content {
-    margin-top: 100px; /* Ensure the main content appears below the header */
+    /* margin-top: 1px;  */
     text-align: center;
 }
 
 /* Body layout adjustments */
 body {
     font-family: 'Roboto', sans-serif;  /* Use a modern font */
-    background-color: #f8f9fa;          /* Light background */
+    background-color: #d1e2f4;          /* Light background */
     color: #343a40;                     /* Dark text */
     margin: 0;
     padding: 0;
@@ -161,4 +162,52 @@ div.checkbox-container {
     display: flex;
     align-items: center;  /* Vertically center the logo */
     justify-content: start; /* Keep it aligned to the left */
+}
+
+/* Submenu styling */
+.submenu {
+    display: none; /* Hidden by default */
+    background-color: #63aefd; /* Lighter blue for submenu */
+    padding: 10px 0;
+    position: absolute; /* Makes the submenu overlay the content below */
+    top: 92px; /* Position submenu just below the header */
+    left: 0; /* Align the submenu with the left of the page */
+    width: 100%; /* Make the submenu span the full width */
+    z-index: 1; /* Ensure submenu appears above other elements */
+}
+
+.submenu .horizontal-menu {
+    display: flex;
+    justify-content: center; /* Center the items horizontally */
+    gap: 20px; /* Set the gap between the items */
+}
+
+.submenu .horizontal-menu a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    text-align: center;
+}
+
+.submenu .horizontal-menu a:hover {
+    background-color: #e99957; /* Same hover color as main menu */
+}
+
+.flash {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.flash.success {
+    color: green;
+}
+
+.flash.danger {
+    color: red;
+}
+
+.flash.info {
+    color: #007bff;
 }

@@ -40,6 +40,18 @@
             {{ form.password.label() }} {{ form.password() }}
             {{ form.submit() }}
         </form>
+
+        <!-- Display flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <p class="flash {{ category }}">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
         <div class="link">
             <p>Don't have an account? <a href="{{ url_for('main.register') }}">Register here</a></p>
         </div>

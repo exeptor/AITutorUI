@@ -1,0 +1,109 @@
+<!-- users_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Users List</title>
+    <style>
+        /* Add your custom styles here */
+        .container1{
+            width: 800px;
+            max-width: 1000px; /* Set a max width for the container */
+            margin: 20px auto; /* Center the container */
+            padding: 20px;
+            background-color: transparent; /* No background color */
+            border-radius: 0; /* No rounded corners */
+            box-shadow: none; /* No shadow effect */
+        }
+    
+        h1 {
+            text-align: center; /* Center the heading */
+            color: #333; /* Darker text color */
+        }
+    
+        table {
+            width: 100%; /* Full width of the container */
+            border-collapse: collapse; /* Remove space between borders */
+            margin-top: 0px; /* Space above the table */
+        }
+    
+        th, td {
+            padding: 12px; /* Padding in table cells */
+            text-align: left; /* Align text to the left */
+            border-bottom: 1px solid #63aefd; /* Bottom border for rows */
+        }
+    
+        th {
+            color: #007bff; /* Header text color */
+        }
+    
+        tr:hover {
+            background-color: #f1f1f1; /* Highlight row on hover */
+        }
+    
+        button {
+            padding: 6px 12px; /* Padding for buttons */
+            border: none; /* No border */
+            border-radius: 4px; /* Rounded corners for buttons */
+            cursor: pointer; /* Pointer cursor on hover */
+            transition: background-color 0.3s; /* Smooth background change */
+            background-color: #63aefd;
+        }
+    
+        button:hover {
+            background-color: #ee7512; /* Light gray on hover */
+        }
+    
+        .status-active {
+            color: green; /* Green for active users */
+        }
+    
+        .status-inactive {
+            color: red; /* Red for inactive users */
+        }
+
+        .text-color {
+            color: #007bff; /* Change this to your desired color */
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container1">
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td class="text-color">{{ user.username }}</td>
+                    <td class="text-color">{{ user.email }}</td>
+                    <td class="text-color">{{ user.role }}</td>
+                    <td class="{{ 'status-active' if user.is_active else 'status-inactive' }}">
+                        {{ 'Active' if user.is_active else 'Inactive' }}
+                    </td>
+                    <td>
+                        <form action="{{ url_for('main.toggle_user_status', user_id=user.id) }}" method="POST">
+                            {% if user.is_active %}
+                                <button type="submit" name="action" value="deactivate">Deactivate</button>
+                            {% else %}
+                                <button type="submit" name="action" value="activate">Activate</button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

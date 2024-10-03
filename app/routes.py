@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, flash, redirect, url_for, session
+from flask import Blueprint, render_template, flash, redirect, url_for, session, request
 from .forms import LoginForm, RegistrationForm
 from .models import db, User
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_required
+from flask_login import login_required, current_user, login_user
 from .decorators.auth_decorators import admin_required
+
 
 main = Blueprint('main', __name__)
 
@@ -20,9 +21,13 @@ def login():
         
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
-            session['username'] = username
-            flash('Login successful!', 'success')
-            return redirect(url_for('main.dashboard'))
+            if user.is_active:
+                login_user(user)
+                session['username'] = username
+                session['role'] = user.role
+                return redirect(url_for('main.dashboard'))
+            else:
+                flash('Your account has been temporarily blocked. Please contact support.', 'danger')
         else:
             flash('Login failed. Check your username and password.', 'danger')
 
@@ -58,11 +63,11 @@ def register():
 @main.route("/dashboard")
 def dashboard():
     username = session.get('username')
-    return render_template("dashboard.html", username=username)
+    role = session.get('role')  # Retrieve role from session
+    return render_template("dashboard.html", username=username, role=role)
 
 @main.route('/logout')
 def logout():
-    flash('You have been logged out.', 'info')
     return redirect(url_for('main.index'))
 
 @main.route('/admin/approve_teacher/<int:user_id>', methods=['POST'])
@@ -79,3 +84,33 @@ def approve_teacher(user_id):
     else:
         flash('User not found or not applied for teacher', 'error')
     return redirect(url_for('admin_dashboard'))
+
+@main.route('/admin/users_list')
+@login_required
+@admin_required
+def users_list():
+    try:
+        users = User.query.filter(User.role != 'admin').all()
+        return render_template('users_list.html', users=users)
+    except Exception as e:
+        print(f"Error fetching users: {e}")
+        return "An error occurred", 500
+
+@main.route('/admin/toggle_user_status/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required
+def toggle_user_status(user_id):
+    user = User.query.get(user_id)
+    if user:
+        action = request.form.get('action')
+        if action == 'activate':
+            user.is_active = True
+            flash(f'User {user.username} has been activated.', 'success')
+        elif action == 'deactivate':
+            user.is_active = False
+            flash(f'User {user.username} has been deactivated.', 'success')
+        db.session.commit()
+    else:
+        flash('User not found.', 'danger')
+    return redirect(url_for('main.dashboard'))
+

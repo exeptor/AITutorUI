@@ -16,13 +16,35 @@
                 <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo"  alt="">
             </div>
             
-            <!-- Horizontal menu -->
-            <nav class="horizontal-menu">
-                <a href="#">Home</a>
-                <a href="#">Courses</a>
-                <a href="#">Blog</a>
-                <a href="#">Contacts</a>
-            </nav>
+            <!-- Conditional Header Menu based on Role -->
+            {% if role == 'admin' %}
+                <nav class="horizontal-menu">
+                    <a href="#" class="menu-item" onclick="toggleSubMenu('users')">Users</a>
+                    <a href="#" class="menu-item" onclick="toggleSubMenu('courses')">Courses</a>
+                    <a href="#">Reports</a>
+                    <a href="#" class="menu-item" onclick="toggleSubMenu('settings')">Settings</a>
+                </nav>
+            {% elif role == 'teacher' %}
+                <nav class="horizontal-menu">
+                    <a href="#">Home</a>
+                    <a href="#">My Courses</a>
+                    <a href="#">Create Lesson</a>
+                </nav>
+            {% elif role == 'student' %}
+                <nav class="horizontal-menu">
+                    <a href="#">Home</a>
+                    <a href="#">Courses</a>
+                    <a href="#">Blog</a>
+                    <a href="#">Contacts</a>
+                </nav>
+            {% endif %}
+
+            <!-- Submenu (Initially Hidden) -->
+            <div class="submenu" id="submenu">
+                <nav class="horizontal-menu" id="submenu-items">
+                    <!-- Submenu items will be inserted here dynamically -->
+                </nav>
+            </div>
 
             <!-- User section -->
             <div class="header-user">
@@ -34,9 +56,74 @@
         </div>
     </header>
 
+    <!-- Main content section -->
     <div class="main-content">
-        <h2>Welcome to Your Dashboard!</h2>
-        <p>This is a placeholder for your dashboard content.</p>
+        <div id="dynamic-content"></div>
+
     </div>
+
+    <script>
+        let activeMenu = null;
+
+        function toggleSubMenu(menu) {
+            const submenu = document.getElementById('submenu');
+            const submenuItems = document.getElementById('submenu-items');
+
+            const menuOptions = {
+                'users': [
+                    { text: 'Users List', link: '/admin/users_list' },
+                    { text: 'User Notifications', link: '#' }
+                ],
+                'courses': [
+                    { text: 'Available Courses', link: '#' },
+                    { text: 'Waiting for Approval', link: '#' }
+                ],
+                'settings': [
+                    { text: 'Blog Settings', link: '#' },
+                    { text: 'Other Settings', link: '#' }
+                ]
+            };
+
+            if (activeMenu === menu) {
+                if (submenu.style.display === 'block') {
+                    submenu.style.display = 'none';
+                    activeMenu = null;
+                } else {
+                    submenu.style.display = 'block';
+                }
+            } else {
+                submenuItems.innerHTML = '';
+                if (menuOptions[menu]) {
+                    menuOptions[menu].forEach(item => {
+                        const a = document.createElement('a');
+                        a.href = 'javascript:void(0)';
+                        a.innerText = item.text;
+                        a.onclick = () => loadContent(item.link);
+                        submenuItems.appendChild(a);
+                    });
+                }
+
+                submenu.style.display = 'block';
+                activeMenu = menu;
+            }
+        }
+
+        function loadContent(content) {
+            const dynamicContent = document.getElementById('dynamic-content');
+
+            if (content === '/admin/users_list') {
+                fetch('/admin/users_list')
+                    .then(response => response.text())
+                    .then(html => {
+                        dynamicContent.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Error loading content:', error);
+                    });
+            } else {
+                dynamicContent.innerHTML = '<p>Content not available yet.</p>';
+            }
+        }
+    </script>
 </body>
 </html>
