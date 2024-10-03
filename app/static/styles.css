@@ -136,8 +136,10 @@ button:hover {
 
 /* Main content below header */
 .main-content {
-    /* margin-top: 1px;  */
+    margin-top: 70px; 
     text-align: center;
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
 }
 
 /* Body layout adjustments */

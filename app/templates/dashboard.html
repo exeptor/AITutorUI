@@ -72,7 +72,7 @@
             const menuOptions = {
                 'users': [
                     { text: 'Users List', link: '/admin/users_list' },
-                    { text: 'User Notifications', link: '#' }
+                    { text: 'User Notifications', link: '/admin/user_notification' }
                 ],
                 'courses': [
                     { text: 'Available Courses', link: '#' },
@@ -113,6 +113,15 @@
 
             if (content === '/admin/users_list') {
                 fetch('/admin/users_list')
+                    .then(response => response.text())
+                    .then(html => {
+                        dynamicContent.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Error loading content:', error);
+                    });
+            } else if (content === '/admin/user_notification') {
+                fetch('/admin/user_notification')
                     .then(response => response.text())
                     .then(html => {
                         dynamicContent.innerHTML = html;

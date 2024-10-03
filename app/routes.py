@@ -75,15 +75,27 @@ def logout():
 @admin_required
 def approve_teacher(user_id):
     user = User.query.get(user_id)
-    if user and user.applied_for_teacher:
-        user.role = 'teacher'
-        user.is_teacher_approved = True
-        user.applied_for_teacher = False
+    if user:
+        action = request.form.get('action')
+        if action == 'approve':
+            user.role = 'teacher'
+            user.is_teacher_approved = True
+            user.applied_for_teacher = False
         db.session.commit()
-        flash('Teacher application approved', 'success')
     else:
         flash('User not found or not applied for teacher', 'error')
-    return redirect(url_for('admin_dashboard'))
+    return redirect(url_for('main.dashboard'))
+
+@main.route('/admin/user_notification')
+@login_required
+@admin_required
+def user_notification():
+    try:
+        users = User.query.filter(User.applied_for_teacher).all()
+        return render_template('user_notification.html', users=users)
+    except Exception as e:
+        print(f"Error fetching users: {e}")
+        return "An error occurred", 500
 
 @main.route('/admin/users_list')
 @login_required
@@ -105,10 +117,8 @@ def toggle_user_status(user_id):
         action = request.form.get('action')
         if action == 'activate':
             user.is_active = True
-            flash(f'User {user.username} has been activated.', 'success')
         elif action == 'deactivate':
             user.is_active = False
-            flash(f'User {user.username} has been deactivated.', 'success')
         db.session.commit()
     else:
         flash('User not found.', 'danger')
