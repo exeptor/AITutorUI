@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Contacts Management</title>
+    <style>
+        .button-container {
+            text-align: center; /* Center-align the buttons */
+            margin-top: 20px;  /* Optional: Add some space above the buttons */
+        }
+
+        button {
+            margin: 10px; /* Adds space between buttons */
+            width: 150px; /* Sets a specific width for buttons */
+            padding: 10px; /* Optional: Add padding for better aesthetics */
+        }
+
+        .separator {
+            border-top: 1px solid #ccc; /* Color and thickness of the line */
+            margin: 20px 0; /* Space above and below the line */
+        }
+    </style>
+</head>
+<body>
+    <form action="{{ url_for('main.admin_contacts') }}" method="POST">
+        <div id="contact-forms">
+            {% for contact in contacts %}
+            <div class="contact-form" id="contact-form-{{ loop.index }}">
+                <label for="contact_type_{{ loop.index }}">Contact Type:</label>
+                <input type="text" name="contact_type[]" id="contact_type_{{ loop.index }}" value="{{ contact.contact_type }}" required>
+                <label for="contact_value_{{ loop.index }}">Contact Value:</label>
+                <input type="text" name="contact_value[]" id="contact_value_{{ loop.index }}" value="{{ contact.contact_value }}" required>
+                <button type="submit" formaction="{{ url_for('main.delete_contact', id=contact.id) }}">Delete Contact</button>
+            </div>
+            {% endfor %}
+        </div>
+    </form>
+
+    <hr style="border: 1px solid #ccc; margin: 20px 0;">
+
+    <form action="{{ url_for('main.add_contacts') }}" method="POST">
+        <div id="new-contact-forms">
+            <div class="new-contact-form" id="new-contact-form-0">
+                <label for="new_contact_type_0">Contact Type:</label>
+                <input type="text" name="contact_type[]" id="new_contact_type_0" placeholder="e.g., Phone, Email" required>
+                <label for="new_contact_value_0">Contact Value:</label>
+                <input type="text" name="contact_value[]" id="new_contact_value_0" placeholder="e.g., 123-456-7890" required>
+                <button type="button" class="delete-btn" onclick="removeContactForm(0)">Delete Form</button>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button type="button" id="add-contact-btn">Add New Contact</button>
+            <button type="submit">Save Contacts</button>
+        </div>
+    </form>
+
+</body>
+</html>

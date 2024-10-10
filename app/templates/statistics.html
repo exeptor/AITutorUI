@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>User Statistics</title>
+    <style>
+        /* Add your custom styles here */
+        .container1 {
+            width: 800px;
+            max-width: 1000px; /* Set a max width for the container */
+            margin: 20px auto; /* Center the container */
+            padding: 20px;
+            background-color: transparent; /* No background color */
+            border-radius: 0; /* No rounded corners */
+            box-shadow: none; /* No shadow effect */
+        }
+
+        .header-container {
+            display: flex; /* Use flexbox for layout */
+            align-items: center; /* Center items vertically */
+            margin: 20px 0; /* Adjust margin as needed */
+        }
+
+        .header-line {
+            flex: 1; /* Take up remaining space */
+            height: 1px; /* Height of the line */
+            background-color: #007bff; /* Line color */
+            margin: 0 10px; /* Space between line and text */
+        }
+
+        h1 {
+            text-align: center; /* Center the heading text */
+            color: #007bff; /* Darker text color */
+            margin: 0; /* Remove default margin */
+            padding: 0; /* Remove default padding */
+            font-size: 24px;
+        }
+
+        table {
+            width: 100%; /* Full width of the container */
+            border-collapse: collapse; /* Remove space between borders */
+        }
+
+        th, td {
+            padding: 12px; /* Padding in table cells */
+            text-align: left; /* Align text to the left */
+            border-bottom: 1px solid #63aefd; /* Bottom border for rows */
+        }
+
+        th {
+            color: #007bff; /* Header text color */
+        }
+
+        tr:hover {
+            background-color: #f1f1f1; /* Highlight row on hover */
+        }
+
+        .text-color {
+            color: #007bff; /* Change this to your desired color */
+        }
+
+        .text-count-color {
+            color: #ee7512;
+        }
+
+        .text-count-red {
+            color: red; /* Red color for N/A */
+        }
+    </style>
+</head>
+<body>
+    <div class="container1">
+        <div class="header-container">
+            <div class="header-line"></div>
+            <h1>User Statistics</h1>
+            <div class="header-line"></div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Statistic</th>
+                    <th>Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-color">Total Users</td>
+                    <td class="text-count-color">{{ stats.total_users }}</td>
+                </tr>
+                <tr>
+                    <td class="text-color">Active Users</td>
+                    <td class="text-count-color">{{ stats.active_users }}</td>
+                </tr>
+                <tr>
+                    <td class="text-color">Approved Teachers</td>
+                    <td class="text-count-color">{{ stats.teachers }}</td>
+                </tr>
+                <tr>
+                    <td class="text-color">Applied for Teacher Role</td>
+                    <td class="text-count-color">{{ stats.applied_for_teachers }}</td>
+                </tr>
+                <tr>
+                    <td class="text-color">Users with Active Courses</td>
+                    <td class="{{ 'text-count-color' if stats.users_with_active_courses is not none else 'text-count-red' }}">
+                        {{ stats.users_with_active_courses if stats.users_with_active_courses is not none else 'N/A' }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="header-container">
+            <div class="header-line"></div>
+            <h1>Courses Statistics</h1>
+            <div class="header-line"></div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Statistic</th>
+                    <th>Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-color">Total Courses</td>
+                    <td class="{{ 'text-count-color' if stats.total_courses is not none else 'text-count-red' }}">
+                        {{ stats.total_courses if stats.total_courses is not none else 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <td class="text-color">Active Courses</td>
+                    <td class="{{ 'text-count-color' if stats.active_courses is not none else 'text-count-red' }}">
+                        {{ stats.active_courses if stats.active_courses is not none else 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <td class="text-color">Waiting for Approval</td>
+                    <td class="{{ 'text-count-color' if stats.courses_for_approval is not none else 'text-count-red' }}">
+                        {{ stats.courses_for_approval if stats.courses_for_approval is not none else 'N/A' }}
+                    </td>
+                </tr>
+                
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -21,14 +21,16 @@
                 <nav class="horizontal-menu">
                     <a href="#" class="menu-item" onclick="toggleSubMenu('users')">Users</a>
                     <a href="#" class="menu-item" onclick="toggleSubMenu('courses')">Courses</a>
-                    <a href="#">Reports</a>
+                    <a href="#" class="menu-item" onclick="toggleSubMenu('statistics')">Stats</a>
                     <a href="#" class="menu-item" onclick="toggleSubMenu('settings')">Settings</a>
                 </nav>
             {% elif role == 'teacher' %}
                 <nav class="horizontal-menu">
                     <a href="#">Home</a>
-                    <a href="#">My Courses</a>
-                    <a href="#">Create Lesson</a>
+                    <a href="#">Courses</a>
+                    <a href="#">Stats</a>
+                    <a href="#">Blog</a>
+                    <a href="#">Contacts</a>
                 </nav>
             {% elif role == 'student' %}
                 <nav class="horizontal-menu">
@@ -59,7 +61,6 @@
     <!-- Main content section -->
     <div class="main-content">
         <div id="dynamic-content"></div>
-
     </div>
 
     <script>
@@ -78,9 +79,14 @@
                     { text: 'Available Courses', link: '#' },
                     { text: 'Waiting for Approval', link: '#' }
                 ],
+                'statistics': [
+                    { text: 'General Stats', link: '/admin/statistics' },
+                    { text: 'Reports', link: '#' }
+                ],
                 'settings': [
-                    { text: 'Blog Settings', link: '#' },
-                    { text: 'Other Settings', link: '#' }
+                    { text: 'Articles List', link: '/admin/articles_list' },
+                    { text: 'New Article', link: '/admin/new_article' },
+                    { text: 'Contacts', link: '/admin/contacts' }
                 ]
             };
 
@@ -129,8 +135,82 @@
                     .catch(error => {
                         console.error('Error loading content:', error);
                     });
+            } else if (content === '/admin/new_article') {
+                fetch('/admin/new_article')
+                    .then(response => response.text())
+                    .then(html => {
+                        dynamicContent.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Error loading content:', error);
+                    });
+            } else if (content === '/admin/articles_list') {
+                fetch('/admin/articles_list')
+                    .then(response => response.text())
+                    .then(html => {
+                        dynamicContent.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Error loading content:', error);
+                    });
+            } else if (content.startsWith('/admin/edit_article/')) {
+                fetch(content)
+                    .then(response => response.text())
+                    .then(html => {
+                        dynamicContent.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Error loading content:', error);
+                    });
+            } else if (content === '/admin/contacts') {
+                fetch('/admin/contacts')
+                    .then(response => response.text())
+                    .then(html => {
+                        dynamicContent.innerHTML = html;
+                        initializeContactForm();
+                    })
+                    .catch(error => {
+                        console.error('Error loading content:', error);
+                    });
+            } else if (content === '/admin/statistics') {
+                fetch('/admin/statistics')
+                    .then(response => response.text())
+                    .then(html => {
+                        dynamicContent.innerHTML = html;
+                        initializeContactForm();
+                    })
+                    .catch(error => {
+                        console.error('Error loading content:', error);
+                    });
             } else {
                 dynamicContent.innerHTML = '<p>Content not available yet.</p>';
+            }
+        }
+
+        function initializeContactForm() {
+            document.getElementById('add-contact-btn').addEventListener('click', addContactForm);
+
+            document.getElementById('new-contact-forms').addEventListener('click', function(event) {
+                if (event.target && event.target.matches("button.delete-contact-btn")) {
+                    const formId = event.target.getAttribute('data-form-id');
+                    document.getElementById(`new-contact-form-${formId}`).remove();
+                }
+            });
+
+            function addContactForm() {
+                const formContainer = document.getElementById('new-contact-forms');
+                const formCount = document.querySelectorAll('.new-contact-form').length;
+
+                const newForm = `
+                    <div class="contact-form" id="new-contact-form-${formCount}">
+                        <label for="contact_type_${formCount}">Contact Type:</label>
+                        <input type="text" name="contact_type[]" id="new-contact_type_${formCount}" placeholder="e.g., Phone, Email" required>
+                        <label for="contact_value_${formCount}">Contact Value:</label>
+                        <input type="text" name="contact_value[]" id="new-contact_value_${formCount}" placeholder="e.g., 123-456-7890" required>
+                        <button type="button" class="delete-contact-btn" data-form-id="${formCount}">Delete Form</button>
+                    </div>
+                `;
+                formContainer.insertAdjacentHTML('beforeend', newForm);
             }
         }
     </script>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> -->
+    <title>Create Article</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e9f0f7;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *, *::before, *::after {
+            box-sizing: inherit; /* Ensure all elements inherit the box-sizing rule */
+        }
+
+        .container2 {
+            max-width: 1000px;
+            width: 100%;
+            margin: 20px auto;
+            background-color: transparent;
+            padding: 20px;
+            border-radius: 0px;
+            box-shadow: none;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            margin-top: 10px;
+            text-align: left;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .form-group input[type="file"] {
+            display: block;
+        }
+
+        .form-group button {
+            display: block;
+            width: 100%;
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .form-group button:hover {
+            background-color: #ee7512;
+        }
+
+        .form-group-inline {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            justify-content: space-between;
+        }
+
+        .form-group-inline label {
+            margin-right: 10px;
+            font-weight: bold;
+            order: 1;
+        }
+
+        .form-group-inline input[type="file"] {
+            display: inline-block;
+            margin-left: 10px;
+            order: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container2">
+        <form method="POST" action="{{ url_for('main.update_article', article_id=article_id) if article_id else url_for('main.create_article') }}" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+    
+            <div class="form-group">
+                {{ form.title.label }} {{ form.title(size=40) }}
+                {{ form.body.label }} {{ form.body(rows=10, cols=40) }}
+            </div>
+            <div class="form-group-inline">
+                {{ form.headline_picture.label }} {{ form.headline_picture() }}
+            </div>
+            <div class="form-group">
+                <button type="submit">{{ 'Update Article' if article_id else 'Create Article' }}</button>
+            </div>
+        </form>
+    </div>
+    
+</body>
+</html>

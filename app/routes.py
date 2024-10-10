@@ -1,9 +1,11 @@
-from flask import Blueprint, render_template, flash, redirect, url_for, session, request
-from .forms import LoginForm, RegistrationForm
-from .models import db, User
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Blueprint, render_template, flash, redirect, url_for, session, request, current_app
+from .forms import LoginForm, RegistrationForm, ArticleForm
+from .models import db, User, Article, Contact
 from flask_login import login_required, current_user, login_user
+from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 from .decorators.auth_decorators import admin_required
+import os
 
 
 main = Blueprint('main', __name__)
@@ -60,7 +62,7 @@ def register():
 
     return render_template("register.html", form=form)
 
-@main.route("/dashboard")
+@main.route("/dashboard", methods=['GET', 'POST'])
 def dashboard():
     username = session.get('username')
     role = session.get('role')  # Retrieve role from session
@@ -124,3 +126,167 @@ def toggle_user_status(user_id):
         flash('User not found.', 'danger')
     return redirect(url_for('main.dashboard'))
 
+@main.route('/admin/new_article', methods=['GET'])
+@login_required
+@admin_required
+def new_article():
+    form = ArticleForm()
+    return render_template('create_article.html', form=form)
+
+@main.route('/admin/create_article', methods=['POST'])
+@login_required
+@admin_required
+def create_article():
+    form = ArticleForm()
+    if form.validate_on_submit():
+        headline_picture = form.headline_picture.data
+        if headline_picture:
+            filename = secure_filename(headline_picture.filename)
+            uploads_dir = os.path.join(current_app.root_path, 'static', 'uploads')
+            headline_picture.save(os.path.join(uploads_dir, filename))
+
+        article = Article(
+            title=form.title.data,
+            headline_picture=filename if headline_picture else None,
+            body=form.body.data,
+        )
+        db.session.add(article)
+        db.session.commit()
+    else:
+        return render_template('create_article.html', form=form)
+
+    return redirect(url_for('main.dashboard'))
+    
+@main.route('/admin/articles_list')
+@login_required
+@admin_required
+def articles_list():
+    try:
+        articles = Article.query.all()
+        return render_template('articles_list.html', articles=articles)
+    except Exception as e:
+        print(f"Error fetching users: {e}")
+        return "An error occurred", 500
+
+@main.route('/admin/toggle_article_status/<int:article_id>', methods=['POST'])
+@login_required
+@admin_required
+def toggle_article_status(article_id):
+    article = Article.query.get(article_id)
+    if article:
+        action = request.form.get('action')
+        if action == 'activate':
+            article.is_active = True
+        elif action == 'deactivate':
+            article.is_active = False
+        db.session.commit()
+    else:
+        flash('Article not found.', 'danger')
+
+    return redirect(url_for('main.dashboard'))
+
+@main.route('/admin/edit_article/<int:article_id>', methods=['GET'])
+@login_required
+@admin_required
+def render_edit_article(article_id):
+    article = Article.query.get(article_id)
+    if not article:
+        flash('Article not found.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    form = ArticleForm()
+    form.title.data = article.title
+    form.body.data = article.body
+    headline_picture = article.headline_picture if article.headline_picture else None
+
+    return render_template('create_article.html', form=form, article_id=article_id, headline_picture=headline_picture)
+
+
+@main.route('/admin/update_article/<int:article_id>', methods=['POST'])
+@login_required
+@admin_required
+def update_article(article_id):
+    article = Article.query.get(article_id)
+    if not article:
+        flash('Article not found.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    form = ArticleForm()
+
+    if form.validate_on_submit():
+        headline_picture = form.headline_picture.data
+        if headline_picture:
+            filename = secure_filename(headline_picture.filename)
+            uploads_dir = os.path.join(current_app.root_path, 'static', 'uploads')
+            headline_picture.save(os.path.join(uploads_dir, filename))
+            article.headline_picture = filename
+
+        article.title = form.title.data
+        article.body = form.body.data
+        db.session.commit()
+
+        flash('Article updated successfully.', 'success')
+    else:
+        flash('Failed to update the article. Please check the form for errors.', 'danger')
+
+    return redirect(url_for('main.dashboard'))
+
+@main.route('/admin/contacts', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_contacts():
+    contacts = Contact.query.all()
+    return render_template('contacts.html', contacts=contacts)
+
+@main.route('/admin/add_contacts', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_contacts():
+    contact_types = request.form.getlist('contact_type[]')
+    contact_values = request.form.getlist('contact_value[]')
+
+    for contact_type, contact_value in zip(contact_types, contact_values):
+        if contact_type and contact_value:
+            new_contact = Contact(contact_type=contact_type, contact_value=contact_value)
+            db.session.add(new_contact)
+
+    db.session.commit()
+    return redirect(url_for('main.dashboard'))
+
+@main.route('/admin/delete_contact/<int:id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_contact(id):
+    contact = Contact.query.get(id)
+    if contact:
+        db.session.delete(contact)
+        db.session.commit()
+    return redirect(url_for('main.dashboard'))
+
+@main.route('/admin/statistics', methods=['GET'])
+@login_required
+@admin_required
+def render_statistics():
+    total_number_of_users = User.query.count()
+    active_users = User.query.filter_by(is_active=True).count()
+    teachers = User.query.filter_by(is_teacher_approved=True).count()
+    applied_for_teachers = User.query.filter_by(applied_for_teacher=True).count()
+
+    users_with_active_courses = None
+
+    total_courses = None
+    active_courses = None
+    courses_for_approval = None
+
+    stats = {
+        'total_users': total_number_of_users,
+        'active_users': active_users,
+        'teachers': teachers,
+        'applied_for_teachers': applied_for_teachers,
+        'users_with_active_courses': users_with_active_courses,
+        'total_courses' : total_courses,
+        'active_courses' : active_courses,
+        'courses_for_approval' : courses_for_approval
+    }
+
+    return render_template('statistics.html', stats=stats)
