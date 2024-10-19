@@ -18,27 +18,27 @@
             
             <!-- Conditional Header Menu based on Role -->
             {% if role == 'admin' %}
-                <nav class="horizontal-menu">
-                    <a href="#" class="menu-item" onclick="toggleSubMenu('users')">Users</a>
-                    <a href="#" class="menu-item" onclick="toggleSubMenu('courses')">Courses</a>
-                    <a href="#" class="menu-item" onclick="toggleSubMenu('statistics')">Stats</a>
-                    <a href="#" class="menu-item" onclick="toggleSubMenu('settings')">Settings</a>
-                </nav>
+            <nav class="horizontal-menu">
+                <a href="#" class="menu-item" onclick="toggleSubMenu('users')">Users</a>
+                <a href="#" class="menu-item" onclick="toggleSubMenu('courses')">Courses</a>
+                <a href="#" class="menu-item" onclick="toggleSubMenu('statistics')">Stats</a>
+                <a href="#" class="menu-item" onclick="toggleSubMenu('settings')">Settings</a>
+            </nav>
             {% elif role == 'teacher' %}
-                <nav class="horizontal-menu">
-                    <a href="#">Home</a>
-                    <a href="#">Courses</a>
-                    <a href="#">Stats</a>
-                    <a href="#">Blog</a>
-                    <a href="#">Contacts</a>
-                </nav>
+            <nav class="horizontal-menu">
+                <a href="#" onclick="loadContent('/home_content')">Home</a>
+                <a href="#" onclick="loadContent('/under_construction')">Courses</a>
+                <a href="#" onclick="loadContent('/under_construction')">Stats</a>
+                <a href="#" onclick="loadContent('/blog_content')">Blog</a>
+                <a href="#" onclick="loadContent('/contacts_content')">Contacts</a>
+            </nav>
             {% elif role == 'student' %}
-                <nav class="horizontal-menu">
-                    <a href="#">Home</a>
-                    <a href="#">Courses</a>
-                    <a href="#">Blog</a>
-                    <a href="#">Contacts</a>
-                </nav>
+            <nav class="horizontal-menu">
+                <a href="#" onclick="loadContent('/home_content')">Home</a>
+                <a href="#" onclick="loadContent('/under_construction')">Courses</a>
+                <a href="#" onclick="loadContent('/blog_content')">Blog</a>
+                <a href="#" onclick="loadContent('/contacts_content')">Contacts</a>
+            </nav>
             {% endif %}
 
             <!-- Submenu (Initially Hidden) -->
@@ -76,12 +76,12 @@
                     { text: 'User Notifications', link: '/admin/user_notification' }
                 ],
                 'courses': [
-                    { text: 'Available Courses', link: '#' },
-                    { text: 'Waiting for Approval', link: '#' }
+                    { text: 'Available Courses', link: '/under_construction' },
+                    { text: 'Waiting for Approval', link: '/under_construction' }
                 ],
                 'statistics': [
                     { text: 'General Stats', link: '/admin/statistics' },
-                    { text: 'Reports', link: '#' }
+                    { text: 'Reports', link: '/under_construction' }
                 ],
                 'settings': [
                     { text: 'Articles List', link: '/admin/articles_list' },
@@ -117,74 +117,88 @@
         function loadContent(content) {
             const dynamicContent = document.getElementById('dynamic-content');
 
-            if (content === '/admin/users_list') {
-                fetch('/admin/users_list')
-                    .then(response => response.text())
-                    .then(html => {
-                        dynamicContent.innerHTML = html;
-                    })
-                    .catch(error => {
-                        console.error('Error loading content:', error);
-                    });
-            } else if (content === '/admin/user_notification') {
-                fetch('/admin/user_notification')
-                    .then(response => response.text())
-                    .then(html => {
-                        dynamicContent.innerHTML = html;
-                    })
-                    .catch(error => {
-                        console.error('Error loading content:', error);
-                    });
-            } else if (content === '/admin/new_article') {
-                fetch('/admin/new_article')
-                    .then(response => response.text())
-                    .then(html => {
-                        dynamicContent.innerHTML = html;
-                    })
-                    .catch(error => {
-                        console.error('Error loading content:', error);
-                    });
-            } else if (content === '/admin/articles_list') {
-                fetch('/admin/articles_list')
-                    .then(response => response.text())
-                    .then(html => {
-                        dynamicContent.innerHTML = html;
-                    })
-                    .catch(error => {
-                        console.error('Error loading content:', error);
-                    });
-            } else if (content.startsWith('/admin/edit_article/')) {
-                fetch(content)
-                    .then(response => response.text())
-                    .then(html => {
-                        dynamicContent.innerHTML = html;
-                    })
-                    .catch(error => {
-                        console.error('Error loading content:', error);
-                    });
-            } else if (content === '/admin/contacts') {
-                fetch('/admin/contacts')
-                    .then(response => response.text())
-                    .then(html => {
-                        dynamicContent.innerHTML = html;
+            fetch(content)
+                .then(response => response.text())
+                .then(html => {
+                    dynamicContent.innerHTML = html;
+
+                    // Call specific initialization functions if needed
+                    if (content === '/admin/contacts') {
                         initializeContactForm();
-                    })
-                    .catch(error => {
-                        console.error('Error loading content:', error);
-                    });
-            } else if (content === '/admin/statistics') {
-                fetch('/admin/statistics')
-                    .then(response => response.text())
-                    .then(html => {
-                        dynamicContent.innerHTML = html;
-                        initializeContactForm();
-                    })
-                    .catch(error => {
-                        console.error('Error loading content:', error);
-                    });
-            } else {
-                dynamicContent.innerHTML = '<p>Content not available yet.</p>';
-            }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading content:', error);
+                    dynamicContent.innerHTML = '<p>Error loading content. Please try again.</p>';
+                });
+            // if (content === '/admin/users_list') {
+            //     fetch('/admin/users_list')
+            //         .then(response => response.text())
+            //         .then(html => {
+            //             dynamicContent.innerHTML = html;
+            //         })
+            //         .catch(error => {
+            //             console.error('Error loading content:', error);
+            //         });
+            // } else if (content === '/admin/user_notification') {
+            //     fetch('/admin/user_notification')
+            //         .then(response => response.text())
+            //         .then(html => {
+            //             dynamicContent.innerHTML = html;
+            //         })
+            //         .catch(error => {
+            //             console.error('Error loading content:', error);
+            //         });
+            // } else if (content === '/admin/new_article') {
+            //     fetch('/admin/new_article')
+            //         .then(response => response.text())
+            //         .then(html => {
+            //             dynamicContent.innerHTML = html;
+            //         })
+            //         .catch(error => {
+            //             console.error('Error loading content:', error);
+            //         });
+            // } else if (content === '/admin/articles_list') {
+            //     fetch('/admin/articles_list')
+            //         .then(response => response.text())
+            //         .then(html => {
+            //             dynamicContent.innerHTML = html;
+            //         })
+            //         .catch(error => {
+            //             console.error('Error loading content:', error);
+            //         });
+            // } else if (content.startsWith('/admin/edit_article/')) {
+            //     fetch(content)
+            //         .then(response => response.text())
+            //         .then(html => {
+            //             dynamicContent.innerHTML = html;
+            //         })
+            //         .catch(error => {
+            //             console.error('Error loading content:', error);
+            //         });
+            // } else if (content === '/admin/contacts') {
+            //     fetch('/admin/contacts')
+            //         .then(response => response.text())
+            //         .then(html => {
+            //             dynamicContent.innerHTML = html;
+            //             initializeContactForm();
+            //         })
+            //         .catch(error => {
+            //             console.error('Error loading content:', error);
+            //         });
+            // } else if (content === '/admin/statistics') {
+            //     fetch('/admin/statistics')
+            //         .then(response => response.text())
+            //         .then(html => {
+            //             dynamicContent.innerHTML = html;
+            //             initializeContactForm();
+            //         })
+            //         .catch(error => {
+            //             console.error('Error loading content:', error);
+            //         });
+            // } else {
+            //     dynamicContent.innerHTML = '<p>Content not available yet.</p>';
+            // }
         }
 
         function initializeContactForm() {

@@ -290,3 +290,26 @@ def render_statistics():
     }
 
     return render_template('statistics.html', stats=stats)
+
+@main.route('/home_content')
+def home_content():
+    return render_template('home_content.html')
+
+@main.route('/blog_content')
+def blog_content():
+    articles = Article.query.filter_by(is_active=True).all()
+    return render_template('blog_content.html', articles=articles)
+
+@main.route('/article_detail/<int:article_id>')
+def article_detail(article_id):
+    article = Article.query.get_or_404(article_id)
+    return render_template('article_detail.html', article=article)
+
+@main.route('/contacts_content')
+def contacts_content():
+    contacts = Contact.query.all()
+    return render_template('contacts_content.html', contacts=contacts)
+
+@main.route('/under_construction')
+def under_construction():
+    return render_template('under_construction.html')
