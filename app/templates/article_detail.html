@@ -1,21 +1,29 @@
-<div class="article-detail">
-    <div class="article-header">
-        <!-- Article Title -->
-        <h2>{{ article.title }}</h2>
-        
-        <!-- Article Image -->
-        <div class="article-image">
-            <img src="{{ url_for('static', filename='uploads/' + article.headline_picture) }}" alt="{{ article.title }}">
+{% extends 'base.html' %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block content %}
+    <div class="article-detail">
+        <div class="article-header">
+            <!-- Article Title -->
+            <h2>{{ article.title }}</h2>
+            
+            <!-- Article Image -->
+            <div class="article-image">
+                <img src="{{ url_for('static', filename='uploads/' + article.headline_picture) }}" alt="{{ article.title }}">
+            </div>
+        </div>
+
+        <!-- Article Body -->
+        <div class="article-body">
+            <p>{{ article.body }}</p>
+        </div>
+
+        <!-- Back to Blog Button -->
+        <div class="back-to-blog">
+            <a href="{{ url_for('main.blog_content') }}" class="back-button">Back to Blog</a>
         </div>
     </div>
-
-    <!-- Article Body -->
-    <div class="article-body">
-        <p>{{ article.body }}</p>
-    </div>
-
-    <!-- Back to Blog Button -->
-    <div class="back-to-blog">
-        <a href="#" onclick="loadContent('/blog_content')" class="back-button">Back to Blog</a>
-    </div>
-</div>
+{% endblock %}

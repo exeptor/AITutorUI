@@ -1,23 +1,32 @@
-<div class="main-content">
-    <h2>AITutor Contacts</h2>
-    <div class="contact-section">
-        <table class="contact-table">
-            <tbody>
-                {% for contact in contacts %}
-                <tr>
-                    <td style="font-weight: bold;">{{ contact.contact_type }}</td>
-                    <td>
-                        {% if "@" in contact.contact_value %}
-                            <a href="mailto:{{ contact.contact_value }}">{{ contact.contact_value }}</a>
-                        {% elif contact.contact_value.startswith('+') or contact.contact_value.replace(' ', '').isdigit() %}
-                            <a href="tel:{{ contact.contact_value }}">{{ contact.contact_value }}</a>
-                        {% else %}
-                            <a href="{{ contact.contact_value }}" target="_blank">{{ contact.contact_value }}</a>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+{% extends 'base.html' %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block content %}
+    <div class="main-content">
+        <h2>AITutor Contacts</h2>
+        <div class="contact-section">
+            <table class="contact-table">
+                <tbody>
+                    {% for contact in contacts %}
+                    <tr>
+                        <td style="font-weight: bold;">{{ contact.contact_type }}</td>
+                        <td>
+                            {% if "@" in contact.contact_value %}
+                                <a href="mailto:{{ contact.contact_value }}">{{ contact.contact_value }}</a>
+                            {% elif contact.contact_value.startswith('+') or contact.contact_value.replace(' ', '').isdigit() %}
+                                <a href="tel:{{ contact.contact_value }}">{{ contact.contact_value }}</a>
+                            {% else %}
+                                <a href="{{ contact.contact_value }}" target="_blank">{{ contact.contact_value }}</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
+{% endblock %}
+
