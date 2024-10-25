@@ -1,11 +1,10 @@
-<!-- users_list.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>User Notifications</title>
+{% extends 'base.html' %}
+
+{% block title %}
+    Users Notification
+{% endblock %}
+
+{% block styles %}
     <style>
         /* Add your custom styles here */
         .container1{
@@ -64,9 +63,9 @@
             color: #007bff; /* Change this to your desired color */
         }
     </style>
-    
-</head>
-<body>
+{% endblock %}
+ 
+{% block content %}
     <div class="container1">
         <table>
             <thead>
@@ -95,5 +94,5 @@
             </tbody>
         </table>
     </div>
-</body>
-</html>
+{% endblock %}
+

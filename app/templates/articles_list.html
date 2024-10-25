@@ -1,11 +1,10 @@
-<!-- users_list.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>Users List</title>
+{% extends 'base.html' %}
+
+{% block title %}
+    Article List
+{% endblock %}
+
+{% block styles %}
     <style>
         /* Add your custom styles here */
         .container1{
@@ -68,9 +67,9 @@
             color: #007bff; /* Change this to your desired color */
         }
     </style>
-    
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <div class="container1">
         <table>
             <thead>
@@ -85,7 +84,7 @@
                 <tr>
                     <!-- <td class="text-color">{{ article.title }}</td> -->
                     <td class="text-color">
-                        <a href="javascript:void(0)" onclick="loadContent('/admin/edit_article/{{ article.id }}')">{{ article.title }}</a>
+                        <a href="{{ url_for('main.render_edit_article', article_id=article.id) }}">{{ article.title }}</a>
                     </td>
                     <td class="{{ 'status-active' if article.is_active else 'status-inactive' }}">
                         {{ 'Active' if article.is_active else 'Inactive' }}
@@ -104,5 +103,4 @@
             </tbody>
         </table>
     </div>
-</body>
-</html>
+{% endblock %}

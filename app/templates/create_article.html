@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> -->
-    <title>Create Article</title>
+{% extends 'base.html' %}
+
+{% block title %}
+    Article List
+{% endblock %}
+
+{% block styles %}
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -96,8 +96,9 @@
             order: 2;
         }
     </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <div class="container2">
         <form method="POST" action="{{ url_for('main.update_article', article_id=article_id) if article_id else url_for('main.create_article') }}" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
@@ -114,6 +115,4 @@
             </div>
         </form>
     </div>
-    
-</body>
-</html>
+{% endblock %}

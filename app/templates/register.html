@@ -1,37 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>Register</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-    <!-- Header section -->
-    <header class="header">
-        <div class="header-content">
-            <!-- Logo -->
-            <div class="header-logo">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo" alt="">
-            </div>
-            
-            <!-- Horizontal menu -->
-            <nav class="horizontal-menu">
-                <a href="#" onclick="loadContent('/home_content')">Home</a>
-                <a href="#" onclick="loadContent('/under_construction')">Courses</a>
-                <a href="#" onclick="loadContent('/blog_content')">Blog</a>
-                <a href="#" onclick="loadContent('/contacts_content')">Contacts</a>
-            </nav>
+{% block title %}
+    Home
+{% endblock %}
 
-            <!-- User section -->
-            <div class="header-user">
-                <img src="{{ url_for('static', filename='images/user-icon.png') }}" alt="User Icon">
-                <a href="{{ url_for('main.login') }}">Log in</a>
-            </div>
-        </div>
-    </header>
-
+{% block content %}
     <div class="container">
         <h2>Register</h2>
         <form method="POST">
@@ -44,9 +17,20 @@
             </div>
             {{ form.submit() }}
         </form>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <p class="flash {{ category }}">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
         <div class="link">
             <p>Already have an account? <a href="{{ url_for('main.login') }}">Login here</a></p>
         </div>
     </div>
-</body>
-</html>
+{% endblock %}
+

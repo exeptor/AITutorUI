@@ -12,12 +12,12 @@ body {
 }
 
 .container {
-    width: 100%;
-    max-width: 400px;                  /* Max width for form */
-    background-color: #fff;            /* White background for the card */
-    padding: 2rem;
-    border-radius: 8px;                /* Rounded corners */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    width: 400px;  /* Set a width if needed */
+    margin: 0 auto; /* Center the container */
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 h2 {
@@ -31,10 +31,14 @@ form {
     flex-direction: column;
 }
 
+label {
+    text-align: left;  /* Ensures that the labels are aligned to the left */
+}
+
 input[type="text"], input[type="password"], input[type="email"] {
     padding: 10px;
     margin-bottom: 1rem;
-    border: 1px solid #ced4da;        /* Light border */
+    border: 1px solid #dacece;        /* Light border */
     border-radius: 4px;               /* Rounded corners */
     transition: border-color 0.3s;     /* Transition for input focus */
 }
@@ -42,6 +46,21 @@ input[type="text"], input[type="password"], input[type="email"] {
 input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus {
     border-color: #007bff;             /* Accent color on focus */
     outline: none;                     /* Remove outline */
+}
+
+input[type="submit"] {
+    padding: 10px;                     /* Padding for spacing */
+    background-color: #007bff;         /* Button background color */
+    color: white;                      /* Button text color */
+    border: none;                      /* Remove default border */
+    border-radius: 4px;                /* Rounded corners */
+    cursor: pointer;                   /* Show pointer on hover */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+    font-size: 16px;
+}
+
+input[type="submit"]:hover {
+    background-color: #ee7512;         /* Darker shade when hovered */
 }
 
 button {
@@ -130,7 +149,6 @@ button:hover {
 }
 
 .header-user a:hover {
-    /* text-decoration: underline; */
     color: #ee7512;
 }
 
@@ -151,8 +169,12 @@ body {
     padding: 0;
 }
 
-div.checkbox-container {
-    margin-bottom: 15px; /* Adjust this value for more or less space */
+.checkbox-container {
+    text-align: left;     /* Align the container's contents to the left */
+    display: flex;        /* Use flexbox to align the checkbox and label in a row */
+    align-items: center;  /* Vertically center the checkbox and label */
+    gap: 10px; 
+    margin-bottom: 15px;
 }
 
 .logo {
@@ -167,6 +189,7 @@ div.checkbox-container {
 }
 
 /* Submenu styling */
+/* Styling for hidden submenu */
 .submenu {
     display: none; /* Hidden by default */
     background-color: #63aefd; /* Lighter blue for submenu */
@@ -176,23 +199,28 @@ div.checkbox-container {
     left: 0; /* Align the submenu with the left of the page */
     width: 100%; /* Make the submenu span the full width */
     z-index: 1; /* Ensure submenu appears above other elements */
+    justify-content: center;
+    text-align: center; /* Center the submenu items */
 }
 
-.submenu .horizontal-menu {
-    display: flex;
-    justify-content: center; /* Center the items horizontally */
-    gap: 20px; /* Set the gap between the items */
-}
-
-.submenu .horizontal-menu a {
+.submenu a {
     color: white;
     text-decoration: none;
-    padding: 10px 20px;
+    padding: 5px 20px;
     text-align: center;
+    display: inline-block;
+    font-weight: bold;
 }
 
-.submenu .horizontal-menu a:hover {
-    background-color: #e99957; /* Same hover color as main menu */
+.submenu a:hover {
+    background-color: #e99957;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, border-radius 0.3s ease;
+
+}
+
+.submenu.show {
+    display: block;
 }
 
 .flash {

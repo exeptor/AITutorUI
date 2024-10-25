@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, session, request, current_app
 from .forms import LoginForm, RegistrationForm, ArticleForm
 from .models import db, User, Article, Contact
-from flask_login import login_required, current_user, login_user
+from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from .decorators.auth_decorators import admin_required
@@ -45,7 +45,7 @@ def register():
         applied_for_teacher = form.applied_for_teacher.data
         
         if User.query.filter((User.username == username) | (User.email == email)).first():
-            flash('Username or email already exists. Please choose another.', 'danger')
+            flash('Username or email already exists.', 'danger')
             return redirect(url_for('main.register'))
         
         new_user = User(
@@ -65,11 +65,14 @@ def register():
 @main.route("/dashboard", methods=['GET', 'POST'])
 def dashboard():
     username = session.get('username')
-    role = session.get('role')  # Retrieve role from session
-    return render_template("dashboard.html", username=username, role=role)
+    role = session.get('role')
+    return render_template("dashboard.html", role=role, username=username)
 
 @main.route('/logout')
 def logout():
+    logout_user()
+    session.pop('username', None)
+    session.pop('role', None)
     return redirect(url_for('main.index'))
 
 @main.route('/admin/approve_teacher/<int:user_id>', methods=['POST'])
@@ -92,9 +95,11 @@ def approve_teacher(user_id):
 @login_required
 @admin_required
 def user_notification():
+    username = session.get('username')
+    role = session.get('role')
     try:
         users = User.query.filter(User.applied_for_teacher).all()
-        return render_template('user_notification.html', users=users)
+        return render_template('user_notification.html', users=users, username=username, role=role)
     except Exception as e:
         print(f"Error fetching users: {e}")
         return "An error occurred", 500
@@ -103,9 +108,11 @@ def user_notification():
 @login_required
 @admin_required
 def users_list():
+    username = session.get('username')
+    role = session.get('role')
     try:
         users = User.query.filter(User.role != 'admin').all()
-        return render_template('users_list.html', users=users)
+        return render_template('users_list.html', users=users, username=username, role=role)
     except Exception as e:
         print(f"Error fetching users: {e}")
         return "An error occurred", 500
@@ -124,14 +131,16 @@ def toggle_user_status(user_id):
         db.session.commit()
     else:
         flash('User not found.', 'danger')
-    return redirect(url_for('main.dashboard'))
+    return redirect(url_for('main.users_list'))
 
 @main.route('/admin/new_article', methods=['GET'])
 @login_required
 @admin_required
 def new_article():
+    username = session.get('username')
+    role = session.get('role')
     form = ArticleForm()
-    return render_template('create_article.html', form=form)
+    return render_template('create_article.html', form=form, username=username, role=role)
 
 @main.route('/admin/create_article', methods=['POST'])
 @login_required
@@ -155,15 +164,17 @@ def create_article():
     else:
         return render_template('create_article.html', form=form)
 
-    return redirect(url_for('main.dashboard'))
+    return redirect(url_for('main.articles_list'))
     
 @main.route('/admin/articles_list')
 @login_required
 @admin_required
 def articles_list():
+    username = session.get('username')
+    role = session.get('role')
     try:
         articles = Article.query.all()
-        return render_template('articles_list.html', articles=articles)
+        return render_template('articles_list.html', articles=articles, username=username, role=role)
     except Exception as e:
         print(f"Error fetching users: {e}")
         return "An error occurred", 500
@@ -183,7 +194,7 @@ def toggle_article_status(article_id):
     else:
         flash('Article not found.', 'danger')
 
-    return redirect(url_for('main.dashboard'))
+    return redirect(url_for('main.articles_list'))
 
 @main.route('/admin/edit_article/<int:article_id>', methods=['GET'])
 @login_required
@@ -192,7 +203,7 @@ def render_edit_article(article_id):
     article = Article.query.get(article_id)
     if not article:
         flash('Article not found.', 'danger')
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('main.articles_list'))
 
     form = ArticleForm()
     form.title.data = article.title
@@ -209,7 +220,7 @@ def update_article(article_id):
     article = Article.query.get(article_id)
     if not article:
         flash('Article not found.', 'danger')
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('main.articles_list'))
 
     form = ArticleForm()
 
@@ -229,14 +240,16 @@ def update_article(article_id):
     else:
         flash('Failed to update the article. Please check the form for errors.', 'danger')
 
-    return redirect(url_for('main.dashboard'))
+    return redirect(url_for('main.articles_list'))
 
 @main.route('/admin/contacts', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def admin_contacts():
+    username = session.get('username')
+    role = session.get('role')
     contacts = Contact.query.all()
-    return render_template('contacts.html', contacts=contacts)
+    return render_template('contacts.html', contacts=contacts, username=username, role=role)
 
 @main.route('/admin/add_contacts', methods=['GET', 'POST'])
 @login_required
@@ -251,7 +264,7 @@ def add_contacts():
             db.session.add(new_contact)
 
     db.session.commit()
-    return redirect(url_for('main.dashboard'))
+    return redirect(url_for('main.admin_contacts'))
 
 @main.route('/admin/delete_contact/<int:id>', methods=['POST'])
 @login_required
@@ -261,12 +274,15 @@ def delete_contact(id):
     if contact:
         db.session.delete(contact)
         db.session.commit()
-    return redirect(url_for('main.dashboard'))
+    return redirect(url_for('main.admin_contacts'))
 
 @main.route('/admin/statistics', methods=['GET'])
 @login_required
 @admin_required
 def render_statistics():
+    username = session.get('username')
+    role = session.get('role')
+
     total_number_of_users = User.query.count()
     active_users = User.query.filter_by(is_active=True).count()
     teachers = User.query.filter_by(is_teacher_approved=True).count()
@@ -289,27 +305,43 @@ def render_statistics():
         'courses_for_approval' : courses_for_approval
     }
 
-    return render_template('statistics.html', stats=stats)
+    return render_template('statistics.html', stats=stats, username=username, role=role)
 
 @main.route('/home_content')
 def home_content():
-    return render_template('home_content.html')
+    username = session.get('username')
+    role = session.get('role')
+    return render_template('home_content.html', username=username, role=role)
 
 @main.route('/blog_content')
 def blog_content():
+    username = session.get('username')
+    role = session.get('role')
     articles = Article.query.filter_by(is_active=True).all()
-    return render_template('blog_content.html', articles=articles)
+    return render_template('blog_content.html', articles=articles, username=username, role=role)
 
 @main.route('/article_detail/<int:article_id>')
 def article_detail(article_id):
+    username = session.get('username')
+    role = session.get('role')
     article = Article.query.get_or_404(article_id)
-    return render_template('article_detail.html', article=article)
+    return render_template('article_detail.html', article=article, username=username, role=role)
 
 @main.route('/contacts_content')
 def contacts_content():
+    username = session.get('username')
+    role = session.get('role')
     contacts = Contact.query.all()
-    return render_template('contacts_content.html', contacts=contacts)
+    return render_template('contacts_content.html', contacts=contacts, username=username, role=role)
 
 @main.route('/under_construction')
 def under_construction():
-    return render_template('under_construction.html')
+    username = session.get('username')
+    role = session.get('role')
+    return render_template('under_construction.html', username=username, role=role)
+
+@main.route("/teacher_statistics", methods=['GET', 'POST'])
+def teacher_statistics():
+    username = session.get('username')
+    role = session.get('role')
+    return render_template('under_construction.html', username=username, role=role)

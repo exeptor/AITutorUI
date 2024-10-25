@@ -5,25 +5,22 @@
 {% endblock %}
 
 {% block content %}
-    <div class="main-content">
-        <!-- Display each article in a structured way -->
-        <div class="articles-container">
-            {% for article in articles %}
-            <div class="article-card">
-                <div class="article-headline-picture">
-                    <img src="{{ url_for('static', filename='uploads/' + article.headline_picture) }}" alt="Headline Image">
-                </div>
-                <div class="article-details">
-                    <h3>{{ article.title }}</h3>
-                    <p>
-                        {{ article.body[:200] }}... 
-                        <!-- <a href="{{ url_for('main.article_detail', article_id=article.id) }}" class="read-more-btn">Read more</a> -->
-                        <a href="{{ url_for('main.article_detail', article_id=article.id) }}" class="read-more-link">Read more</a>
-                    </p>
-                </div>
+    <div class="articles-container">
+        {% for article in articles %}
+        <div class="article-card">
+            <div class="article-headline-picture">
+                <img src="{{ url_for('static', filename='uploads/' + article.headline_picture) }}" alt="Headline Image">
             </div>
-            {% endfor %}
+            <div class="article-details">
+                <h3>{{ article.title }}</h3>
+                <p>
+                    {{ article.body[:200] }}... 
+                    <!-- <a href="{{ url_for('main.article_detail', article_id=article.id) }}" class="read-more-btn">Read more</a> -->
+                    <a href="{{ url_for('main.article_detail', article_id=article.id) }}" class="read-more-link">Read more</a>
+                </p>
+            </div>
         </div>
+        {% endfor %}
     </div>
 {% endblock %}
 

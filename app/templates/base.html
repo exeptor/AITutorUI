@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AITutor - {% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    
+    <!-- Block for custom styles -->
+    {% block styles %}
+    {% endblock %}    
 </head>
-<body>
+<body data-authenticated="{{ current_user.is_authenticated | tojson }}">
 
     <!-- Header section -->
     <header class="header">
@@ -16,30 +20,43 @@
                 <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo" alt="">
             </div>
             
-            <!-- Horizontal menu -->
+            <!-- user_nav.html -->
+            {% if role == 'admin' %}
+            <nav class="horizontal-menu">
+                <a href="#" onclick="toggleSubMenu('users')">Users</a>
+                <a href="#" onclick="toggleSubMenu('courses')">Courses</a>
+                <a href="#" onclick="toggleSubMenu('statistics')">Stats</a>
+                <a href="#" onclick="toggleSubMenu('settings')">Settings</a>
+            </nav>
+            {% elif role == 'teacher' %}
+            <nav class="horizontal-menu">
+                <a href="{{ url_for('main.home_content') }}">Home</a>
+                <a href="#" onclick="toggleSubMenu('teacher_courses')">Courses</a>
+                <a href="{{ url_for('main.teacher_statistics') }}">Statistics</a>
+                <a href="{{ url_for('main.blog_content') }}">Blog</a>
+                <a href="{{ url_for('main.contacts_content') }}">Contacts</a>
+            </nav>
+            {% elif role == 'student' %}
+            <nav class="horizontal-menu">
+                <a href="{{ url_for('main.home_content') }}">Home</a>
+                <a href="#" onclick="toggleSubMenu('student_courses')">Courses</a>
+                <a href="{{ url_for('main.blog_content') }}">Blog</a>
+                <a href="{{ url_for('main.contacts_content') }}">Contacts</a>  
+            </nav>        
+            {% else %}
             <nav class="horizontal-menu">
                 <a href="{{ url_for('main.home_content') }}">Home</a>
                 <a href="{{ url_for('main.under_construction') }}">Courses</a>
                 <a href="{{ url_for('main.blog_content') }}">Blog</a>
                 <a href="{{ url_for('main.contacts_content') }}">Contacts</a>
-                
-                {% if current_user.is_authenticated %}
-                    {% if current_user.role == 'student' %}
-                        <a href="{{ url_for('student.dashboard') }}">Student Dashboard</a>
-                    {% elif current_user.role == 'teacher' %}
-                        <a href="{{ url_for('teacher.dashboard') }}">Teacher Dashboard</a>
-                    {% elif current_user.role == 'admin' %}
-                        <a href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a>
-                    {% endif %}
-                {% endif %}
-            </nav>
+            </nav>        
+            {% endif %}
 
             <!-- User section -->
             <div class="header-user">
                 {% if current_user.is_authenticated %}
                     <img src="{{ url_for('static', filename='images/user-icon.png') }}" alt="User Icon">
-                    <span>Welcome, {{ current_user.username }}!</span>
-                    <a href="{{ url_for('main.logout') }}">Log out</a>
+                    <p>{{ username }} | <a href="{{ url_for('main.logout') }}">Logout</a></p>
                 {% else %}
                     <img src="{{ url_for('static', filename='images/user-icon.png') }}" alt="User Icon">
                     <a href="{{ url_for('main.login') }}">Log in</a>
@@ -48,10 +65,98 @@
         </div>
     </header>
 
+    <!-- Submenu section -->
+    <div class="submenu-container">
+        <!-- Admin Submenus -->
+        <div id="submenu-users" class="submenu">
+            <a href="{{ url_for('main.users_list') }}">Users List</a>
+            <a href="{{ url_for('main.user_notification') }}">User Notifications</a>
+        </div>
+        <div id="submenu-courses" class="submenu">
+            <a href="{{ url_for('main.under_construction') }}">Available Courses</a>
+            <a href="{{ url_for('main.under_construction') }}">Waiting for Approval</a>
+        </div>
+        <div id="submenu-statistics" class="submenu">
+            <a href="{{ url_for('main.render_statistics') }}">General Stats</a>
+            <a href="{{ url_for('main.under_construction') }}">Reports</a>
+        </div>
+        <div id="submenu-settings" class="submenu">
+            <a href="{{ url_for('main.articles_list') }}">Articles List</a>
+            <a href="{{ url_for('main.new_article') }}">New Article</a>
+            <a href="{{ url_for('main.admin_contacts') }}">Contacts</a>
+        </div>
+
+        <!-- Teacher Submenus -->
+        <div id="submenu-teacher_courses" class="submenu hidden">
+            <a href="{{ url_for('main.under_construction') }}">Available Courses</a>
+            <a href="{{ url_for('main.under_construction') }}">My Courses</a>
+            <a href="{{ url_for('main.under_construction') }}">Author Courses</a>
+            <a href="{{ url_for('main.under_construction') }}">Create Course</a>
+        </div>
+
+        <!-- Student Submenus -->
+        <div id="submenu-student_courses" class="submenu hidden">
+            <a href="{{ url_for('main.under_construction') }}">Available Courses</a>
+            <a href="{{ url_for('main.under_construction') }}">My Courses</a>
+        </div>
+    </div>
+
     <!-- Main content -->
     <div class="main-content">
         {% block content %}{% endblock %}
     </div>
 
+    <!-- JS for submenu toggle with Local Storage -->
+    <script>
+        let activeMenu = localStorage.getItem('activeMenu'); // Get the saved active menu from local storage
+    
+        const isAuthenticated = document.body.dataset.authenticated === 'true';
+    
+        // Function to toggle submenu and store state in local storage
+        function toggleSubMenu(menu) {
+            // Hide the currently active submenu if there's one
+            if (activeMenu && activeMenu !== menu) {
+                document.getElementById('submenu-' + activeMenu)?.classList.remove('show');
+            }
+    
+            // Get the new submenu to toggle
+            const submenu = document.getElementById('submenu-' + menu);
+            
+            if (submenu) {
+                // Toggle visibility of the clicked submenu
+                submenu.classList.toggle('show');
+    
+                // Update the activeMenu if the submenu is shown, otherwise reset activeMenu
+                if (submenu.classList.contains('show')) {
+                    activeMenu = menu;
+                    localStorage.setItem('activeMenu', menu); // Save active menu to local storage
+                } else {
+                    activeMenu = null;
+                    localStorage.removeItem('activeMenu'); // Remove from local storage if no menu is active
+                }
+            }
+        }
+    
+        // When the page loads, check if there's an active submenu and show it
+        window.onload = function() {
+            if (isAuthenticated) { // Only show submenu if user is authenticated
+                if (activeMenu) {
+                    const savedSubmenu = document.getElementById('submenu-' + activeMenu);
+                    if (savedSubmenu) {
+                        savedSubmenu.classList.add('show'); // Show the saved submenu
+                    }
+                }
+            } else {
+                // Clear the activeMenu when the user is not authenticated
+                localStorage.removeItem('activeMenu');
+            }
+        }
+    </script>
+    
+
+    <!-- This is the block for custom JavaScript -->
+    {% block scripts %}
+    <!-- Default scripts for the base template go here (optional) -->
+    {% endblock %}
 </body>
 </html>

@@ -1,8 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Contacts Management</title>
+{% extends 'base.html' %}
+
+{% block title %}
+    Admin Contacts
+{% endblock %}
+
+{% block styles %}
     <style>
         .button-container {
             text-align: center; /* Center-align the buttons */
@@ -20,8 +22,9 @@
             margin: 20px 0; /* Space above and below the line */
         }
     </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <form action="{{ url_for('main.admin_contacts') }}" method="POST">
         <div id="contact-forms">
             {% for contact in contacts %}
@@ -54,6 +57,41 @@
             <button type="submit">Save Contacts</button>
         </div>
     </form>
+{% endblock %}
 
-</body>
-</html>
+{% block scripts %}
+    <script>
+        function initializeContactForm() {
+            document.getElementById('add-contact-btn').addEventListener('click', addContactForm);
+
+            document.getElementById('new-contact-forms').addEventListener('click', function(event) {
+                if (event.target && event.target.matches("button.delete-contact-btn")) {
+                    const formId = event.target.getAttribute('data-form-id');
+                    document.getElementById(`new-contact-form-${formId}`).remove();
+                }
+            });
+        }
+
+        function addContactForm() {
+            const formContainer = document.getElementById('new-contact-forms');
+            const formCount = document.querySelectorAll('.new-contact-form').length;
+
+            const newForm = `
+                <div class="new-contact-form" id="new-contact-form-${formCount}">
+                    <label for="new_contact_type_${formCount}">Contact Type:</label>
+                    <input type="text" name="contact_type[]" id="new_contact_type_${formCount}" placeholder="e.g., Phone, Email" required>
+                    <label for="new_contact_value_${formCount}">Contact Value:</label>
+                    <input type="text" name="contact_value[]" id="new_contact_value_${formCount}" placeholder="e.g., 123-456-7890" required>
+                    <button type="button" class="delete-contact-btn" data-form-id="${formCount}">Delete Form</button>
+                </div>
+            `;
+            formContainer.insertAdjacentHTML('beforeend', newForm);
+        }
+
+        // Ensure the function is called when the DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeContactForm();
+        });
+    </script>
+{% endblock %}
+
