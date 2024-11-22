@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Create Courses
+{% endblock %}
+
+{% block styles %}
+    <style>
+        .container {
+            width: 1000px;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0px;
+            background-color: transparent;
+            margin-top: 30px;
+            overflow: hidden;
+            box-sizing: border-box;
+            border-radius: 0%;
+            box-shadow: none;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            text-align: left;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            display: block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ee7512;
+        }
+
+        .save-course-button {
+            margin-top: 50px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 20px 40px;
+            font-size: 1.25em;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .save-course-button:hover {
+            background-color: #ee7512;
+        }
+
+
+        .button-group {
+            display: flex;
+            gap: 10px; /* Space between the buttons */
+            margin-top: 10px;
+        }
+
+        .button-group button {
+            padding: 8px 12px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .button-group button:hover {
+            background-color: #ee7512;
+        }
+        
+        .file-upload-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .file-upload-group label {
+            margin-right: 10px;
+        }
+
+        .file-upload-group input[type="file"] {
+            flex-shrink: 0;
+        }
+
+        .file-upload-group #fileNameDisplay {
+            margin-left: 10px;
+        }
+
+        .chapter {
+            margin-top: 30px;
+            margin-left: 30px;
+        }
+
+        .topic {
+            margin-top: 30px;
+            margin-left: 30px;
+        }
+
+        .question {
+            margin-top: 30px;
+            margin-left: 30px;
+        }
+
+        .answer {
+            margin-top: 30px;
+            margin-left: 20px;
+        }
+
+        .checkbox-container {
+            margin-top: 10px;
+        }
+
+        .flash-messages {
+            margin: 20px 0;
+        }
+
+        .flash-messages .alert {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: block;
+            text-align: center;
+        }
+
+        .flash-messages .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .flash-messages .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <form action="{{ url_for('main.save_course') }}" method="post" enctype="multipart/form-data">
+
+        <div class="form-group">
+            <label for="courseTitle">Course Title:</label>
+            <input type="text" id="courseTitle" name="courseTitle" placeholder="Enter course title" required>
+        </div>
+
+        <div class="form-group">
+            <label for="courseIntro">Course Introduction:</label>
+            <textarea id="courseIntro" name="courseIntro" placeholder="Enter course introduction" rows="4" required></textarea>
+        </div>
+
+        <div class="form-group file-upload-group">
+            <label for="courseImage">Choose a picture:</label>
+            <input type="file" id="courseImage" name="courseImage" accept="image/*" onchange="showFileName()">
+            <span id="fileNameDisplay" style="margin-left: 10px;"></span>
+        </div>
+
+        <button type="button" id="newChapterButton" onclick="addNewChapter()">New Chapter</button>
+        <div id="chaptersContainer"></div>
+
+        <button type="submit" id="saveCourseButton" class="save-course-button">Save Course</button>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            function createElement(tag, options = {}) {
+                const element = document.createElement(tag);
+                for (let [key, value] of Object.entries(options)) {
+                    if (key === 'innerText') {
+                        element.innerText = value;
+                    } else if (key === 'onClick') {
+                        element.onclick = value;
+                    } else {
+                        element[key] = value;
+                    }
+                }
+                return element;
+            }
+
+            function createButtonGroup(buttons) {
+                const buttonGroup = createElement('div', { className: 'button-group' });
+                buttons.forEach(({ text, onClick }) => {
+                    const button = createElement('button', {
+                        type: 'button',
+                        innerText: text,
+                        onClick: onClick
+                    });
+                    buttonGroup.appendChild(button);
+                });
+                return buttonGroup;
+            }
+
+            function addNewChapter() {
+                const chaptersContainer = document.getElementById('chaptersContainer');
+
+                const chapterDiv = createElement('div', { className: 'chapter' });
+                chapterDiv.appendChild(createElement('label', { innerText: 'Chapter Title:' }));
+                chapterDiv.appendChild(createElement('input', {
+                    type: 'text',
+                    name: 'chapterTitle',
+                    placeholder: 'Enter chapter title',
+                    required: true
+                }));
+
+                const buttonGroup = createButtonGroup([
+                    { text: 'New Chapter', onClick: addNewChapter },
+                    { text: 'New Topic', onClick: () => addNewTopic(chapterDiv) },
+                    { text: 'Delete Chapter', onClick: () => chaptersContainer.removeChild(chapterDiv) }
+                ]);
+
+                chapterDiv.appendChild(buttonGroup);
+                chaptersContainer.appendChild(chapterDiv);
+            }
+
+            function addNewTopic(chapterDiv) {
+                const topicDiv = createElement('div', { className: 'topic' });
+                
+                topicDiv.appendChild(createElement('label', { innerText: 'Topic Title:' }));
+                topicDiv.appendChild(createElement('input', {
+                    type: 'text',
+                    name: 'topicTitle',
+                    placeholder: 'Enter topic title',
+                    required: true
+                }));
+                topicDiv.appendChild(createElement('label', { innerText: 'Topic Body:' }));
+                topicDiv.appendChild(createElement('textarea', {
+                    name: 'topicBody',
+                    placeholder: 'Enter topic body',
+                    required: true,
+                    rows: 4
+                }));
+
+                const buttonGroup = createButtonGroup([
+                    { text: 'New Topic', onClick: () => addNewTopic(chapterDiv) },
+                    { text: 'New Question', onClick: () => addNewQuestion(topicDiv) },
+                    { text: 'Delete Topic', onClick: () => chapterDiv.removeChild(topicDiv) }
+                ]);
+
+                topicDiv.appendChild(buttonGroup);
+                chapterDiv.appendChild(topicDiv);
+            }
+
+            function addNewQuestion(topicDiv) {
+                const questionDiv = createElement('div', { className: 'question' });
+                
+                questionDiv.appendChild(createElement('label', { innerText: 'Question Body:' }));
+                questionDiv.appendChild(createElement('textarea', {
+                    name: 'questionBody',
+                    placeholder: 'Enter question body',
+                    required: true,
+                    rows: 2
+                }));
+
+                const buttonGroup = createButtonGroup([
+                    { text: 'New Answer', onClick: () => addNewAnswer(questionDiv) },
+                    { text: 'Delete Question', onClick: () => topicDiv.removeChild(questionDiv) }
+                ]);
+
+                questionDiv.appendChild(buttonGroup);
+                topicDiv.appendChild(questionDiv);
+            }
+
+            // Adds a new answer within a question
+            function addNewAnswer(questionDiv) {
+                const answerDiv = createElement('div', { className: 'answer' });
+                
+                answerDiv.appendChild(createElement('textarea', {
+                    name: 'answerBody',
+                    placeholder: 'Enter answer here',
+                    required: true,
+                    rows: 1
+                }));
+
+                const checkboxDiv = createElement('div', { className: 'checkbox-container' });
+                const answerCheckbox = createElement('input', { type: 'checkbox', name: 'answerCorrect', id: 'answerCorrect' });
+                checkboxDiv.appendChild(answerCheckbox);
+                checkboxDiv.appendChild(createElement('label', { htmlFor: 'answerCorrect', innerText: 'Mark as Correct' }));
+
+                answerDiv.appendChild(checkboxDiv);
+
+                const buttonGroup = createButtonGroup([
+                    { text: 'Delete Answer', onClick: () => questionDiv.removeChild(answerDiv) }
+                ]);
+
+                answerDiv.appendChild(buttonGroup);
+                questionDiv.appendChild(answerDiv);
+            }
+
+            document.getElementById('newChapterButton').onclick = addNewChapter;
+        });
+    </script>
+
+{% endblock %}

@@ -154,7 +154,7 @@ button:hover {
 
 /* Main content below header */
 .main-content {
-    margin-top: 70px; 
+    margin-top: 40px;
     text-align: center;
     overflow-y: auto;
     max-height: calc(100vh - 200px);
@@ -189,7 +189,6 @@ body {
 }
 
 /* Submenu styling */
-/* Styling for hidden submenu */
 .submenu {
     display: none; /* Hidden by default */
     background-color: #63aefd; /* Lighter blue for submenu */

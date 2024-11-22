@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Author Courses
+{% endblock %}
+
+{% block styles %}
+    <style>
+        .courses-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .course-card {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            background-color: transparent;
+            border-radius: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .course-headline-picture img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .course-details {
+            flex: 1;
+        }
+
+        .course-details h3 {
+            margin: 0;
+            font-size: 24px;
+            color: #007BFF;
+            margin-bottom: 30px;
+        }
+
+        .course-details p {
+            font-size: 16px;
+            color: #333;
+            max-width: 70ch;
+            white-space: normal;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .status-and-buttons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-text {
+            margin-left: 5px;
+        }
+
+        .status-red {
+            color: red;
+        }
+
+        .status-orange {
+            color: orange;
+        }
+
+        .status-green {
+            color: green;
+        }
+
+        .status-purple {
+            color: purple;
+        }
+
+        .course-buttons form,
+        .course-buttons button {
+            margin: 0;
+        }
+
+        .course-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .course-buttons button:hover {
+            background-color: #ee7512;
+        }
+
+        .disabled {
+            background-color: #ddd;
+            color: #666;
+            cursor: not-allowed;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="courses-container">
+        {% for course in author_courses %}
+        <div class="course-card">
+            <div class="course-headline-picture">
+                <img src="{{ url_for('static', filename='uploads/' + course.headline_picture) }}" alt="Headline Image">
+            </div>
+            <div class="course-details">
+                <h3>{{ course.title }}</h3>
+                <p>
+                    {{ course.body[:320] }}... 
+                </p>
+
+                <div class="status-and-buttons">
+                    <p>
+                        <strong style="color: #007BFF;">Status:</strong>
+                        <span 
+                            class="status-text 
+                            {% if course.status.value in ['NotReviewed-NotPublished', 'Disabled'] %}status-red{% 
+                            elif course.status.value == 'Send for Review and Publishing' %}status-orange{% 
+                            elif course.status.value == 'Reviewed-Published' %}status-green{% 
+                            elif course.status.value in ['Disable Request', 'Enable Request'] %}status-purple{% 
+                            endif %}">
+                            {{ course.status.value }}
+                        </span>
+                    </p>
+
+                    <span style="margin: 0 5px; font-size: 1.5em; color: #007BFF">|</span>
+
+                    <div class="course-buttons">
+                        {% if course.status.value == 'NotReviewed-NotPublished' %}
+                            <form action="{{ url_for('main.send_course_for_review', course_id=course.id) }}" method="post">
+                                <button type="submit">Send for Review and Publishing</button>
+                            </form>
+                        {% elif course.status.value in ['Send for Review and Publishing', 'Disable Request', 'Enable Request'] %}
+                            <button type="button" class="disabled" disabled>Disable Course</button>
+                            <button type="button" class="disabled" disabled>Edit Course</button>
+                        {% elif course.status.value == 'Reviewed-Published' %}
+                            <form action="{{ url_for('main.change_course_status_request', course_id=course.id) }}" method="post">
+                                <button type="submit">Disable Course</button>
+                            </form>
+                            <form action="{{ url_for('main.edit_course', course_id=course.id) }}" method="get">
+                                <button type="submit">Edit Course</button>
+                            </form>
+                        {% elif course.status.value == 'Disabled' %}
+                            <form action="{{ url_for('main.change_course_status_request', course_id=course.id) }}" method="post">
+                                <button type="submit">Enable Course</button>
+                            </form>
+                            <form action="{{ url_for('main.edit_course', course_id=course.id) }}" method="post">
+                                <button type="submit">Edit Course</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+

@@ -46,7 +46,7 @@
             {% else %}
             <nav class="horizontal-menu">
                 <a href="{{ url_for('main.home_content') }}">Home</a>
-                <a href="{{ url_for('main.under_construction') }}">Courses</a>
+                <a href="{{ url_for('main.available_courses') }}">Courses</a>
                 <a href="{{ url_for('main.blog_content') }}">Blog</a>
                 <a href="{{ url_for('main.contacts_content') }}">Contacts</a>
             </nav>        
@@ -73,8 +73,8 @@
             <a href="{{ url_for('main.user_notification') }}">User Notifications</a>
         </div>
         <div id="submenu-courses" class="submenu">
-            <a href="{{ url_for('main.under_construction') }}">Available Courses</a>
-            <a href="{{ url_for('main.under_construction') }}">Waiting for Approval</a>
+            <a href="{{ url_for('main.available_courses_admin') }}">Available Courses</a>
+            <a href="{{ url_for('main.courses_review') }}">Waiting for Approval</a>
         </div>
         <div id="submenu-statistics" class="submenu">
             <a href="{{ url_for('main.render_statistics') }}">General Stats</a>
@@ -88,16 +88,16 @@
 
         <!-- Teacher Submenus -->
         <div id="submenu-teacher_courses" class="submenu hidden">
-            <a href="{{ url_for('main.under_construction') }}">Available Courses</a>
-            <a href="{{ url_for('main.under_construction') }}">My Courses</a>
-            <a href="{{ url_for('main.under_construction') }}">Author Courses</a>
-            <a href="{{ url_for('main.under_construction') }}">Create Course</a>
+            <a href="{{ url_for('main.available_courses') }}">Available Courses</a>
+            <a href="{{ url_for('main.my_courses') }}">My Courses</a>
+            <a href="{{ url_for('main.author_courses') }}">Author Courses</a>
+            <a href="{{ url_for('main.create_course') }}">Create Course</a>
         </div>
 
         <!-- Student Submenus -->
         <div id="submenu-student_courses" class="submenu hidden">
-            <a href="{{ url_for('main.under_construction') }}">Available Courses</a>
-            <a href="{{ url_for('main.under_construction') }}">My Courses</a>
+            <a href="{{ url_for('main.available_courses') }}">Available Courses</a>
+            <a href="{{ url_for('main.my_courses') }}">My Courses</a>
         </div>
     </div>
 

@@ -1,10 +1,11 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, session, request, current_app
 from .forms import LoginForm, RegistrationForm, ArticleForm
-from .models import db, User, Article, Contact
+from .models import db, User, Article, Contact, Course, UserCourse
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from .decorators.auth_decorators import admin_required
+from .enums import CourseStatus
 import os
 
 
@@ -27,6 +28,7 @@ def login():
                 login_user(user)
                 session['username'] = username
                 session['role'] = user.role
+                session['id'] = user.id
                 return redirect(url_for('main.dashboard'))
             else:
                 flash('Your account has been temporarily blocked. Please contact support.', 'danger')
@@ -288,11 +290,11 @@ def render_statistics():
     teachers = User.query.filter_by(is_teacher_approved=True).count()
     applied_for_teachers = User.query.filter_by(applied_for_teacher=True).count()
 
-    users_with_active_courses = None
+    users_with_active_courses = UserCourse.query.filter(UserCourse.is_started == True).distinct(UserCourse.user_id).count()
+    active_courses = UserCourse.query.filter(UserCourse.is_started == True).distinct(UserCourse.course_id).count()
 
-    total_courses = None
-    active_courses = None
-    courses_for_approval = None
+    total_courses = Course.query.count()
+    courses_for_approval = Course.query.filter_by(status=CourseStatus.SEND_FOR_REVIEW_AND_PUBLISHING).count()
 
     stats = {
         'total_users': total_number_of_users,
@@ -345,3 +347,296 @@ def teacher_statistics():
     username = session.get('username')
     role = session.get('role')
     return render_template('under_construction.html', username=username, role=role)
+
+@main.route("/teacher/create_course", methods=['GET', 'POST'])
+@login_required
+def create_course():
+    username = session.get('username')
+    role = session.get('role')
+    return render_template('create_course.html', username=username, role=role)
+
+@main.route("/save_course", methods=['GET', 'POST'])
+@login_required
+def save_course():
+    if request.method == 'POST':
+        course_title = request.form.get('courseTitle')
+        course_intro = request.form.get('courseIntro')
+        course_image = request.files.get('courseImage')
+        author_id = session.get('id')
+
+        if not course_title or not course_intro:
+            flash('Title and Introduction are required.', 'error')
+            return redirect(url_for('main.create_course'))
+
+        if course_image:
+            image_filename = secure_filename(course_image.filename)
+            uploads_dir = os.path.join(current_app.root_path, 'static', 'uploads')
+            course_image.save(os.path.join(uploads_dir, image_filename))
+        else:
+            image_filename = 'course_default_image.png'
+
+        new_course = Course(
+            title=course_title,
+            headline_picture=image_filename,
+            body=course_intro,
+            status=CourseStatus.NOT_REVIEWED_NOT_PUBLISHED,
+            author_id=author_id
+        )
+        
+        db.session.add(new_course)
+        db.session.commit()
+        
+        flash('Course saved successfully!', 'success')
+
+        return redirect(url_for('main.create_course'))
+    
+    username = session.get('username')
+    role = session.get('role')
+    return render_template('create_course.html', username=username, role=role)
+
+@main.route("/teacher/author_courses", methods=['GET'])
+@login_required
+def author_courses():
+    try:
+        username = session.get('username')
+        role = session.get('role')
+        user_id = session.get('id')
+
+        author_courses = Course.query.filter_by(author_id=user_id).all()
+
+        return render_template('author_courses.html', author_courses=author_courses, username=username, role=role)
+    except Exception as e:
+        print(f"Error fetching courses: {e}")
+        return "An error occurred", 500
+
+@main.route('/teacher/send_course_for_review/<int:course_id>', methods=['GET', 'POST'])
+@login_required
+def send_course_for_review(course_id):
+    course = Course.query.get(course_id)
+    if course:
+        course.status = CourseStatus.SEND_FOR_REVIEW_AND_PUBLISHING
+        db.session.commit()
+
+    return redirect(url_for('main.author_courses'))
+
+@main.route('/teacher/change_course_status_request/<int:course_id>', methods=['GET', 'POST'])
+@login_required
+def change_course_status_request(course_id):
+    course = Course.query.get(course_id)
+    if course:
+        if course.status == CourseStatus.REVIEWED_PUBLISHED:
+            course.status = CourseStatus.DISABEL_COURSE_REQUEST
+        elif course.status == CourseStatus.DISABLED:
+            course.status = CourseStatus.ENABLE_COURSE_REQUEST
+
+        db.session.commit()
+
+    return redirect(url_for('main.author_courses'))
+
+# ToDo
+@main.route('/teacher/edit_course/<int:course_id>')
+def edit_course(course_id):
+    username = session.get('username')
+    role = session.get('role')
+    return render_template('under_construction.html', username=username, role=role)
+
+@main.route('/admin/courses_review', methods=['GET'])
+@login_required
+@admin_required
+def courses_review():
+    courses_for_review = Course.query.filter_by(status=CourseStatus.SEND_FOR_REVIEW_AND_PUBLISHING).all()
+
+    username = session.get('username')
+    role = session.get('role')
+    return render_template('courses_for_approval.html', courses_for_review=courses_for_review, username=username, role=role)
+
+@main.route('/admin/publish_course/<int:course_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def publish_course(course_id):
+    course = Course.query.get(course_id)
+
+    if course:
+        course.status = CourseStatus.REVIEWED_PUBLISHED
+        db.session.commit()
+
+    return redirect(url_for('main.courses_review'))
+
+@main.route('/admin/available_courses_admin')
+@login_required
+@admin_required
+def available_courses_admin():
+    excluded_statuses = [
+        CourseStatus.SEND_FOR_REVIEW_AND_PUBLISHING, 
+        CourseStatus.NOT_REVIEWED_NOT_PUBLISHED
+    ]
+    available_courses = Course.query.filter(~Course.status.in_(excluded_statuses)).all()
+
+    sorted_courses = sorted(
+        available_courses,
+        key=lambda course: course.status in [
+            CourseStatus.DISABEL_COURSE_REQUEST, 
+            CourseStatus.ENABLE_COURSE_REQUEST
+        ],
+        reverse=True
+    )
+
+    username = session.get('username')
+    role = session.get('role')
+    return render_template('available_courses_admin.html', available_courses=sorted_courses, username=username, role=role)
+
+@main.route('/admin/toggle_courses_status/<int:course_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def toggle_courses_status(course_id):
+    course = Course.query.get(course_id)
+    if course:
+        if course.status == CourseStatus.REVIEWED_PUBLISHED:
+            course.status = CourseStatus.DISABLED
+        elif course.status == CourseStatus.DISABLED:
+            course.status = CourseStatus.REVIEWED_PUBLISHED
+        elif course.status == CourseStatus.DISABEL_COURSE_REQUEST:
+            course.status = CourseStatus.DISABLED
+        elif course.status == CourseStatus.ENABLE_COURSE_REQUEST:
+            course.status = CourseStatus.REVIEWED_PUBLISHED
+
+        db.session.commit()
+
+    return redirect(url_for('main.available_courses_admin'))
+
+@main.route('/course_details/<int:course_id>')
+@login_required
+def course_details(course_id):
+    try:
+        username = session.get('username')
+        role = session.get('role')
+
+        course = Course.query.get(course_id)
+
+        return render_template('course_details.html', course=course, username=username, role=role)
+    except Exception as e:
+        print(f"Error fetching courses: {e}")
+        return "An error occurred", 500
+
+@main.route('/available_courses')
+def available_courses():
+    included_with_status = [
+        CourseStatus.REVIEWED_PUBLISHED,
+        CourseStatus.DISABEL_COURSE_REQUEST
+    ]
+
+    available_courses = Course.query.filter(Course.status.in_(included_with_status)).all()
+
+    is_logged_in = 'username' in session
+    username = session.get('username') if is_logged_in else None
+    role = session.get('role') if is_logged_in else None
+
+    subscribed_courses = set()
+    if is_logged_in:
+        user_id = session.get('id')
+        subscribed_courses = {
+            uc.course_id for uc in UserCourse.query.filter_by(user_id=user_id, is_subscribed=True).all()
+        }
+
+    return render_template(
+        'available_courses_global.html', 
+        available_courses=available_courses,
+        subscribed_courses=subscribed_courses, 
+        is_logged_in=is_logged_in,
+        username=username,
+        role=role
+        )
+
+@main.route('/subscribe_to_course', methods=['POST'])
+@login_required
+def subscribe_to_course():
+    try:
+        course_id = request.form.get('course_id')
+        if not course_id:
+            flash("Course ID is missing.", "error")
+            return redirect(url_for('main.available_courses'))
+
+        course = Course.query.get(course_id)
+        if not course:
+            flash("Invalid course ID.", "error")
+            return redirect(url_for('main.available_courses'))
+
+        existing_subscription = UserCourse.query.filter_by(user_id=current_user.id, course_id=course_id).first()
+        if existing_subscription:
+            flash("You are already subscribed to this course.", "info")
+            return redirect(url_for('main.available_courses'))
+
+        user_course = UserCourse(
+            user_id=current_user.id, 
+            course_id=course_id, 
+            is_subscribed=True
+        )
+        db.session.add(user_course)
+        db.session.commit()
+
+        flash("Successfully subscribed to the course!", "success")
+        return redirect(url_for('main.available_courses'))
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error subscribing to course: {e}")
+        flash("An error occurred while subscribing to the course. Please try again.", "error")
+        return redirect(url_for('main.available_courses'))
+
+
+@main.route('/my_courses')
+@login_required
+def my_courses():
+    user_id_sess = session.get('id')
+    if not user_id_sess:
+        flash('Session expired. Please log in again.', 'warning')
+        return redirect(url_for('main.login'))
+
+    mycourses = UserCourse.query.filter_by(user_id=user_id_sess).all()
+
+    username = session.get('username')
+    role = session.get('role')
+
+    return render_template('my_courses.html', mycourses=mycourses, username=username, role=role)
+
+@main.route('/start_course/<int:course_id>', methods=['POST'])
+@login_required
+def start_course(course_id):
+    try:
+        user_course = UserCourse.query.filter_by(
+            user_id=current_user.id, 
+            course_id=course_id
+        ).first()
+
+        if not user_course:
+            return redirect(url_for('main.my_courses'))
+
+        if user_course.is_started:
+            return redirect(url_for('main.my_courses'))
+
+        user_course.is_started = True
+        db.session.commit()
+
+        return redirect(url_for('main.course_chat', course_id=course_id))
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error starting course: {e}")
+        return redirect(url_for('main.my_courses'))
+
+
+#ToDo
+@main.route('/continue_course/<int:course_id>')
+@login_required
+def continue_course(course_id):
+    username = session.get('username')
+    role = session.get('role')
+    return redirect(url_for('main.course_chat', username=username, role=role))
+
+#ToDo
+@main.route('/course_chat/<int:course_id>')
+@login_required
+def course_chat(course_id):
+    username = session.get('username')
+    role = session.get('role')
+    return render_template('course_chat.html', username=username, role=role)

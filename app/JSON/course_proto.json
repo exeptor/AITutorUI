@@ -1,0 +1,88 @@
+{
+    "course_title": "Sample Course Title",
+    "course_introduction": "Sample Course Introduction",
+    "course_body": [
+        {
+            "chapter_title": "Chapter 1",
+            "chapter_body": [
+                {
+                    "topic_title": "Topic 1 Title",
+                    "topic_body": "Topic 1 Body",
+                    "questions": [
+                        {
+                            "question_1": "Question 1",
+                            "answers": [
+                                {
+                                    "answer_1": "Answer 1",
+                                    "is_correct": true
+                                },
+                                {
+                                    "answer_2": "Answer 2",
+                                    "is_correct": false
+                                },
+                                {
+                                    "answer_3": "Answer 3",
+                                    "is_correct": false
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "topic_title": "Topic 2 Title",
+                    "topic_body": "Topic 2 Body"
+                }
+            ]
+        },
+        {
+            "chapter_title": "Chapter 2",
+            "chapter_body": [
+                {
+                    "topic_title": "Topic 1 Title",
+                    "topic_body": "Topic 1 Body"
+                },
+                {
+                    "topic_title": "Topic 2 Title",
+                    "topic_body": "Topic 2 Body",
+                    "questions": [
+                        {
+                            "question_1": "Question 1",
+                            "answers": [
+                                {
+                                    "answer_1": "Answer 1",
+                                    "is_correct": true
+                                },
+                                {
+                                    "answer_2": "Answer 2",
+                                    "is_correct": false
+                                },
+                                {
+                                    "answer_3": "Answer 3",
+                                    "is_correct": false
+                                }
+                            ]
+                        },
+                        {
+                            "question_2": "Question 2",
+                            "answers": [
+                                {
+                                    "answer_1": "Answer 1",
+                                    "is_correct": false
+                                },
+                                {
+                                    "answer_2": "Answer 2",
+                                    "is_correct": false
+                                },
+                                {
+                                    "answer_3": "Answer 3",
+                                    "is_correct": true
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]   
+        }
+    ]
+}
+  

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Course Details
+{% endblock %}
+
+{% block content %}
+    <div class="article-detail">
+        <div class="article-header">
+            <h2>{{ course.title }}</h2>
+            
+            <div class="article-image">
+                <img src="{{ url_for('static', filename='uploads/' + course.headline_picture) }}" alt="{{ course.title }}">
+            </div>
+        </div>
+
+        <div class="article-body">
+            <p>{{ course.body }}</p>
+        </div>
+
+        <div class="back-to-blog">
+            {% if role == 'admin' %}
+                <a href="{{ url_for('main.courses_review') }}" class="back-button">Back to Courses</a>
+            {% else %}
+                <a href="{{ url_for('main.available_courses') }}" class="back-button">Back to Courses</a>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

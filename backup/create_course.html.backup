@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Admin Contacts
+{% endblock %}
+
+{% block styles %}
+    <style>
+        .container {
+            width: 1000px;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0px;
+            background-color: transparent;
+            margin-top: 0%;
+            overflow: hidden;
+            box-sizing: border-box;
+            border-radius: 0%;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            text-align: left;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            display: block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ee7512;
+        }
+
+        .save-course-button {
+            margin-top: 50px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 20px 40px;
+            font-size: 1.25em;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .save-course-button:hover {
+            background-color: #ee7512;
+        }
+
+
+        .button-group {
+            display: flex;
+            gap: 10px; /* Space between the buttons */
+            margin-top: 10px;
+        }
+
+        .button-group button {
+            padding: 8px 12px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .button-group button:hover {
+            background-color: #ee7512;
+        }
+        
+        .file-upload-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .file-upload-group label {
+            margin-right: 10px;
+        }
+
+        .file-upload-group input[type="file"] {
+            flex-shrink: 0;
+        }
+
+        .file-upload-group #fileNameDisplay {
+            margin-left: 10px;
+        }
+
+        .chapter {
+            margin-top: 30px;
+            margin-left: 30px;
+        }
+
+        .topic {
+            margin-top: 30px;
+            margin-left: 30px;
+        }
+
+        .question {
+            margin-top: 30px;
+            margin-left: 30px;
+        }
+
+        .answer {
+            margin-top: 30px;
+            margin-left: 20px;
+        }
+
+        .checkbox-container {
+            margin-top: 10px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-group">
+        <label for="courseTitle">Course Title:</label>
+        <input type="text" id="courseTitle" name="courseTitle" placeholder="Enter course title" required>
+    </div>
+
+    <div class="form-group">
+        <label for="courseIntro">Course Introduction:</label>
+        <textarea id="courseIntro" name="courseIntro" placeholder="Enter course introduction" rows="4" required></textarea>
+    </div>
+
+    <div class="form-group file-upload-group">
+        <label for="courseImage">Choose a picture:</label>
+        <input type="file" id="courseImage" name="courseImage" accept="image/*" onchange="showFileName()">
+        <span id="fileNameDisplay" style="margin-left: 10px;"></span>
+    </div>
+
+    <button type="button" id="newChapterButton" onclick="addNewChapter()">New Chapter</button>
+    <div id="chaptersContainer"></div>
+
+    <button type="button" id="saveCourseButton" class="save-course-button">Save Course</button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            function addNewChapter() {
+                const chaptersContainer = document.getElementById('chaptersContainer');
+
+                const chapterDiv = document.createElement('div');
+                chapterDiv.className = 'chapter';
+                
+                const chapterLabel = document.createElement('label');
+                chapterLabel.innerText = 'Chapter Title:';
+                const chapterInput = document.createElement('input');
+                chapterInput.type = 'text';
+                chapterInput.name = 'chapterTitle';
+                chapterInput.placeholder = 'Enter chapter title';
+                chapterInput.required = true;
+
+                chapterDiv.appendChild(chapterLabel);
+                chapterDiv.appendChild(chapterInput);
+
+                const buttonGroup = document.createElement('div');
+                buttonGroup.className = 'button-group';
+
+                const newChapterButton = document.createElement('button');
+                newChapterButton.type = 'button';
+                newChapterButton.innerText = 'New Chapter';
+                newChapterButton.onclick = addNewChapter;
+
+                const newTopicButton = document.createElement('button');
+                newTopicButton.type = 'button';
+                newTopicButton.innerText = 'New Topic';
+                newTopicButton.onclick = function() {
+                    addNewTopic(chapterDiv);
+                };
+
+                const deleteChapterButton = document.createElement('button');
+                deleteChapterButton.type = 'button';
+                deleteChapterButton.innerText = 'Delete Chapter';
+                deleteChapterButton.onclick = function() {
+                    chaptersContainer.removeChild(chapterDiv);
+                };
+
+                buttonGroup.appendChild(newChapterButton);
+                buttonGroup.appendChild(newTopicButton);
+                buttonGroup.appendChild(deleteChapterButton);
+
+                chapterDiv.appendChild(buttonGroup)
+
+                chaptersContainer.appendChild(chapterDiv);
+            }
+
+            function addNewTopic(chapterDiv) {
+                const topicDiv = document.createElement('div');
+                topicDiv.className = 'topic';
+
+                const topicLabel = document.createElement('label');
+                topicLabel.innerText = 'Topic Title:';
+                const topicTitle = document.createElement('input');
+                topicTitle.type = 'text';
+                topicTitle.name = 'topicTitle';
+                topicTitle.placeholder = 'Enter topic title';
+                topicTitle.required = true;
+                
+                const topicBodyLabel = document.createElement('label');
+                topicBodyLabel.innerText = 'Topic Body:';
+                const topicInput = document.createElement('textarea');
+                topicInput.name = 'topicBody';
+                topicInput.placeholder = 'Enter topic body';
+                topicInput.required = true;
+                topicInput.rows = 4;
+
+                topicDiv.appendChild(topicLabel);
+                topicDiv.appendChild(topicTitle);
+                topicDiv.appendChild(topicBodyLabel);
+                topicDiv.appendChild(topicInput);
+
+                const buttonGroup = document.createElement('div');
+                buttonGroup.className = 'button-group';
+
+                const newTopicButton = document.createElement('button');
+                newTopicButton.type = 'button';
+                newTopicButton.innerText = 'New Topic';
+                newTopicButton.onclick = function() {
+                    addNewTopic(chapterDiv);
+                };
+
+                const newQuestionButton = document.createElement('button');
+                newQuestionButton.type = 'button';
+                newQuestionButton.innerText = 'New Question';
+                newQuestionButton.onclick = function() {
+                    addNewQuestion(topicDiv);
+                };
+
+                const deleteTopicButton = document.createElement('button');
+                deleteTopicButton.type = 'button';
+                deleteTopicButton.innerText = 'Delete Topic';
+                deleteTopicButton.onclick = function() {
+                    chapterDiv.removeChild(topicDiv);
+                };
+
+                buttonGroup.appendChild(newTopicButton);
+                buttonGroup.appendChild(newQuestionButton)
+                buttonGroup.appendChild(deleteTopicButton);
+
+                topicDiv.appendChild(buttonGroup)
+
+                chapterDiv.appendChild(topicDiv);
+            }
+
+            function addNewQuestion(topicDiv) {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+
+                const questionLabel = document.createElement('label');
+                questionLabel.innerText = 'Question Body:';
+                const questionInput = document.createElement('textarea');
+                questionInput.name = 'questionBody';
+                questionInput.placeholder = 'Enter question body';
+                questionInput.required = true;
+                questionInput.rows = 2;
+
+                questionDiv.appendChild(questionLabel);
+                questionDiv.appendChild(questionInput);
+                
+                const buttonGroup = document.createElement('div');
+                buttonGroup.className = 'button-group';
+
+                const newAnswerButton = document.createElement('button');
+                newAnswerButton.type = 'button';
+                newAnswerButton.innerText = 'New Answer';
+                newAnswerButton.onclick = function() {
+                    addNewAnswer(questionDiv);
+                };
+
+                const deleteQuerstionButton = document.createElement('button');
+                deleteQuerstionButton.type = 'button';
+                deleteQuerstionButton.innerText = 'Delete Question';
+                deleteQuerstionButton.onclick = function() {
+                    topicDiv.removeChild(questionDiv);
+                };
+
+                buttonGroup.appendChild(newAnswerButton);
+                buttonGroup.appendChild(deleteQuerstionButton);
+
+                questionDiv.appendChild(buttonGroup);
+
+                topicDiv.appendChild(questionDiv);
+            }
+
+            function addNewAnswer(questionDiv) {
+                const answerDiv = document.createElement('div');
+                answerDiv.className = 'answer';
+
+                const answerInput = document.createElement('textarea');
+                answerInput.name = 'answerBody';
+                answerInput.placeholder = 'Enter answer here';
+                answerInput.required = true;
+                answerInput.rows = 1;
+
+                answerDiv.appendChild(answerInput);
+
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'checkbox-container';
+
+                const answerCheckbox = document.createElement('input');
+                answerCheckbox.type = 'checkbox';
+                answerCheckbox.name = 'answerCorrect';
+                answerCheckbox.id = 'answerCorrect';
+
+                const checkboxLabel = document.createElement('label');
+                checkboxLabel.htmlFor = 'answerCorrect';
+                checkboxLabel.innerText = 'Mark as Correct';
+
+                checkboxDiv.appendChild(answerCheckbox);
+                checkboxDiv.appendChild(checkboxLabel);
+
+                answerDiv.appendChild(checkboxDiv);
+
+                const buttonGroup = document.createElement('div');
+                buttonGroup.className = 'button-group';
+
+                const deleteAnswerButton = document.createElement('button');
+                deleteAnswerButton.type = 'button';
+                deleteAnswerButton.innerText = 'Delete Answer';
+                deleteAnswerButton.onclick = function() {
+                    questionDiv.removeChild(answerDiv);
+                };
+
+                buttonGroup.appendChild(deleteAnswerButton)
+
+                answerDiv.appendChild(buttonGroup)
+
+                questionDiv.appendChild(answerDiv)
+            }
+
+            // Bind the initial New Chapter button to the function
+            document.getElementById('newChapterButton').onclick = addNewChapter;
+        });
+    </script>
+{% endblock %}

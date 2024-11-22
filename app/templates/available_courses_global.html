@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Availalbe Courses Global
+{% endblock %}
+
+{% block styles %}
+    <style>
+        .courses-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .course-card {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            background-color: transparent;
+            border-radius: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .course-headline-picture img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .course-details {
+            flex: 1;
+        }
+
+        .course-details h3 {
+            margin: 0;
+            font-size: 24px;
+            color: #007BFF;
+            margin-bottom: 30px;
+        }
+
+        .course-details p {
+            font-size: 16px;
+            color: #333;
+            max-width: 70ch;
+            white-space: normal;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .status-and-buttons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-text {
+            margin-left: 5px;
+        }
+
+        .status-orange {
+            color: orange;
+        }
+
+        .status-green {
+            color: green;
+        }
+
+        .course-buttons form,
+        .course-buttons button {
+            margin: 0;
+        }
+
+        .course-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .course-buttons button:hover {
+            background-color: #ee7512;
+        }
+
+        .disabled {
+            background-color: #ddd;
+            color: #666;
+            cursor: not-allowed;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="courses-container">
+        {% for course in available_courses %}
+        <div class="course-card">
+            <div class="course-headline-picture">
+                <img src="{{ url_for('static', filename='uploads/' + course.headline_picture) }}" alt="Headline Image">
+            </div>
+            <div class="course-details">
+                <h3>{{ course.title }}</h3>
+                <p>
+                    {{ course.body[:250] }}...
+                    <a href="{{ url_for('main.course_details', course_id=course.id) }}" class="read-more-link">Read more</a> 
+                </p>
+
+                <div class="status-and-buttons">
+                    <p>
+                        <strong style="color: #007BFF;">Status:</strong>
+                        <span 
+                            class="status-text 
+                            {% if course.status.value == 'Reviewed-Published' %}status-green{% 
+                            elif course.status.value == 'Disable Request' %}status-orange{% 
+                            endif %}">
+                            {{ course.status.value }}
+                        </span>
+                    </p>
+
+                    <span style="margin: 0 5px; font-size: 1.5em; color: #007BFF">|</span>
+
+                    {% if is_logged_in %}
+                        <div class="course-buttons">
+                            {% if course.id in subscribed_courses %}
+                                <span>Already subscribed</span>
+                            {% else %}
+                                <form action="{{ url_for('main.subscribe_to_course') }}" method="post">
+                                    <input type="hidden" name="course_id" value="{{ course.id }}">
+                                    <button type="submit">Subscribe</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <span>Login to subscribe</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}
