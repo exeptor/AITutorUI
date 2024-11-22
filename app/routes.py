@@ -290,8 +290,18 @@ def render_statistics():
     teachers = User.query.filter_by(is_teacher_approved=True).count()
     applied_for_teachers = User.query.filter_by(applied_for_teacher=True).count()
 
-    users_with_active_courses = UserCourse.query.filter(UserCourse.is_started == True).distinct(UserCourse.user_id).count()
-    active_courses = UserCourse.query.filter(UserCourse.is_started == True).distinct(UserCourse.course_id).count()
+    users_with_active_courses = (
+        db.session.query(UserCourse.user_id)
+        .filter(UserCourse.is_started == True)
+        .distinct()
+        .count()
+    )
+    active_courses = (
+        db.session.query(UserCourse.course_id)
+        .filter(UserCourse.is_started == True)
+        .distinct()
+        .count()
+    )
 
     total_courses = Course.query.count()
     courses_for_approval = Course.query.filter_by(status=CourseStatus.SEND_FOR_REVIEW_AND_PUBLISHING).count()
